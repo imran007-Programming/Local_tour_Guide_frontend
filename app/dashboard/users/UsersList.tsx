@@ -5,6 +5,7 @@ import { authFetch } from "@/lib/authFetch";
 import { BASE_URL } from "@/lib/config";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Spinner from "@/components/ui/spinner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,7 +73,11 @@ export default function UsersList() {
   }, [currentPage, searchTerm, roleFilter, sortBy, sortOrder]);
 
   if (loading) {
-    return <div className="text-gray-600 dark:text-gray-400">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center py-20">
+        <Spinner size="lg" className="border-red-500" />
+      </div>
+    );
   }
 
   return (

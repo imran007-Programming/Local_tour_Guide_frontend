@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { RegisterFormValues, registerSchema } from "./ValidationSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BASE_URL } from "@/lib/config";
+import { toast } from "sonner";
+import Spinner from "../ui/spinner";
 
 interface RegisterModalProps {
   open: boolean;
@@ -38,15 +40,27 @@ export default function RegisterModal({
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
-    await fetch(`${BASE_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    reset();
-    setOpen(false);
+    try {
+      const res = await fetch(`${BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        toast.success("Registration successful! Please login.");
+        reset();
+        setOpen(false);
+        setLoginOpen(true);
+      } else {
+        toast.error(result.message || "Registration failed");
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -54,7 +68,7 @@ export default function RegisterModal({
       <DialogContent
         className="
         sm:max-w-lg
-        h-screen
+        max-h-screen overflow-y-auto
         bg-white dark:bg-zinc-950
         border border-zinc-200 dark:border-zinc-800
         p-8 rounded-xl
@@ -82,58 +96,63 @@ export default function RegisterModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="mt-2 space-y-2">
-          {/* Name */}
-          <div>
-            <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-              Name
-            </label>
-            <div className="relative mt-2">
-              <User
-                className="absolute left-3 top-3.5 text-zinc-400"
-                size={18}
-              />
-              <input
-                {...register("name")}
-                type="text"
-                placeholder="Enter Full Name"
-                className="w-full pl-10 pr-4 py-3 rounded-md border
-                border-zinc-300 dark:border-zinc-700
-                bg-white dark:bg-zinc-900
-                text-zinc-900 dark:text-white
-                focus:ring-2 focus:ring-red-500 outline-none"
-              />
+          {/* Name and Email - Side by Side */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Name */}
+            <div>
+              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                Name
+              </label>
+              <div className="relative mt-2">
+                <User
+                  className="absolute left-3 top-3.5 text-zinc-400"
+                  size={18}
+                />
+                <input
+                  {...register("name")}
+                  type="text"
+                  placeholder="Enter Full Name"
+                  className="w-full pl-10 pr-4 py-3 rounded-md border
+                  border-zinc-300 dark:border-zinc-700
+                  bg-white dark:bg-zinc-900
+                  text-zinc-900 dark:text-white
+                  focus:ring-2 focus:ring-red-500 outline-none"
+                />
+              </div>
+              {errors.name && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
-            {errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
-            )}
-          </div>
 
-          {/* Email */}
-          <div>
-            <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-              Email
-            </label>
-            <div className="relative mt-2">
-              <Mail
-                className="absolute left-3 top-3.5 text-zinc-400"
-                size={18}
-              />
-              <input
-                {...register("email")}
-                type="email"
-                placeholder="Enter Email"
-                className="w-full pl-10 pr-4 py-3 rounded-md border
-                border-zinc-300 dark:border-zinc-700
-                bg-white dark:bg-zinc-900
-                text-zinc-900 dark:text-white
-                focus:ring-2 focus:ring-red-500 outline-none"
-              />
+            {/* Email */}
+            <div>
+              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                Email
+              </label>
+              <div className="relative mt-2">
+                <Mail
+                  className="absolute left-3 top-3.5 text-zinc-400"
+                  size={18}
+                />
+                <input
+                  {...register("email")}
+                  type="email"
+                  placeholder="Enter Email"
+                  className="w-full pl-10 pr-4 py-3 rounded-md border
+                  border-zinc-300 dark:border-zinc-700
+                  bg-white dark:bg-zinc-900
+                  text-zinc-900 dark:text-white
+                  focus:ring-2 focus:ring-red-500 outline-none"
+                />
+              </div>
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.email.message}
-              </p>
-            )}
           </div>
 
           {/* Role Selection - Hidden when hideRoleSelector is true */}
@@ -148,74 +167,77 @@ export default function RegisterModal({
             </div>
           )}
 
-          {/* Password */}
-          <div>
-            <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-              Password
-            </label>
-            <div className="relative mt-2">
-              <Lock
-                className="absolute left-3 top-3.5 text-zinc-400"
-                size={18}
-              />
-              <input
-                {...register("password")}
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter Password"
-                className="w-full pl-10 pr-10 py-3 rounded-md border
-                border-zinc-300 dark:border-zinc-700
-                bg-white dark:bg-zinc-900
-                text-zinc-900 dark:text-white
-                focus:ring-2 focus:ring-red-500 outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3.5 text-zinc-400"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+          {/* Password and Confirm Password - Side by Side */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Password */}
+            <div>
+              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                Password
+              </label>
+              <div className="relative mt-2">
+                <Lock
+                  className="absolute left-3 top-3.5 text-zinc-400"
+                  size={18}
+                />
+                <input
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter Password"
+                  className="w-full pl-10 pr-10 py-3 rounded-md border
+                  border-zinc-300 dark:border-zinc-700
+                  bg-white dark:bg-zinc-900
+                  text-zinc-900 dark:text-white
+                  focus:ring-2 focus:ring-red-500 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-zinc-400"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
-            {errors.password && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
 
-          {/* Confirm Password */}
-          <div>
-            <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-              Confirm Password
-            </label>
-            <div className="relative mt-2">
-              <Lock
-                className="absolute left-3 top-3.5 text-zinc-400"
-                size={18}
-              />
-              <input
-                {...register("confirmPassword")}
-                type={showConfirm ? "text" : "password"}
-                placeholder="Enter Password"
-                className="w-full pl-10 pr-10 py-3 rounded-md border
-                border-zinc-300 dark:border-zinc-700
-                bg-white dark:bg-zinc-900
-                text-zinc-900 dark:text-white
-                focus:ring-2 focus:ring-red-500 outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-3.5 text-zinc-400"
-              >
-                {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            {/* Confirm Password */}
+            <div>
+              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                Confirm Password
+              </label>
+              <div className="relative mt-2">
+                <Lock
+                  className="absolute left-3 top-3.5 text-zinc-400"
+                  size={18}
+                />
+                <input
+                  {...register("confirmPassword")}
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Enter Password"
+                  className="w-full pl-10 pr-10 py-3 rounded-md border
+                  border-zinc-300 dark:border-zinc-700
+                  bg-white dark:bg-zinc-900
+                  text-zinc-900 dark:text-white
+                  focus:ring-2 focus:ring-red-500 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-3.5 text-zinc-400"
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.confirmPassword.message}
-              </p>
-            )}
           </div>
 
           {/* Terms */}
@@ -233,9 +255,16 @@ export default function RegisterModal({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50"
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {isSubmitting ? "Creating..." : "Register →"}
+            {isSubmitting ? (
+              <>
+                <Spinner size="sm" className="border-white" />
+                Creating...
+              </>
+            ) : (
+              "Register →"
+            )}
           </button>
 
           {/* Divider */}

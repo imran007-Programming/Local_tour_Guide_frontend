@@ -30,13 +30,16 @@ export default function TourActions({
     const res = await authFetch(`${BASE_URL}/tour/${id}`, {
       method: "DELETE",
     });
-
+    const result = await res?.json();
+    if (result.error.statusCode === 400) {
+      toast.error(`${result.message}`);
+    }
     if (res?.ok) {
       toast.success("Tour deleted successfully");
       router.push("/dashboard/listings");
       router.refresh();
     } else {
-      toast.error("Failed to delete tour");
+      // toast.error("Failed to delete tour");
       setDeleting(false);
     }
   };
@@ -63,8 +66,8 @@ export default function TourActions({
           <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl max-w-md w-full mx-4">
             <h3 className="text-xl font-bold mb-2">Delete Tour</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete &quot;{tourTitle}&quot;? This action cannot
-              be undone.
+              Are you sure you want to delete &quot;{tourTitle}&quot;? This
+              action cannot be undone.
             </p>
             <div className="flex gap-3 justify-end">
               <button

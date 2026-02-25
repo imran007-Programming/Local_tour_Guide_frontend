@@ -23,8 +23,12 @@ export interface Booking {
         };
     };
     payment?: {
+        id: string;
         amount: number;
         status: string;
-        paymentMethod?: string;
-    };
+        paymentIntentId?: string;
+        transactionId?: string;
+        paidAt?: string;
+        createdAt: string;
+    }[];
 }

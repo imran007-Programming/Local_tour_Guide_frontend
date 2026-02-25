@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import SignInModal from "./Login";
@@ -9,6 +9,15 @@ import RegisterModal from "./Register";
 export default function AuthWrapper() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenAuth = () => {
+      setRegisterOpen(true);
+    };
+
+    window.addEventListener("openAuthModal", handleOpenAuth);
+    return () => window.removeEventListener("openAuthModal", handleOpenAuth);
+  }, []);
 
   return (
     <>

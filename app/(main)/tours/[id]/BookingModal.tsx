@@ -30,9 +30,9 @@ export default function BookingModal({
     if (!date) return;
 
     setLoading(true);
-    
+
     // Combine date and time into a single DateTime
-    const [hours, minutes] = time.split(':');
+    const [hours, minutes] = time.split(":");
     const bookingDateTime = new Date(date);
     bookingDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
@@ -80,8 +80,8 @@ export default function BookingModal({
               mode="single"
               selected={date}
               onSelect={setDate}
-              className="rounded-md border"
-              disabled={(date) => date < new Date()}
+              className="rounded-md border w-full"
+              disabled={(date) => date <= new Date()}
             />
           </div>
 

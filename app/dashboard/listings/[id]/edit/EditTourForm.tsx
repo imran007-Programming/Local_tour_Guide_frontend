@@ -25,6 +25,7 @@ export default function EditTourForm({ tour }: { tour: Tour }) {
     itinerary: tour.itinerary || "",
     category: tour.category || "",
     languages: tour.languages || [],
+    isActive: tour.isActive ?? true,
   });
 
   const [photos, setPhotos] = useState<File[]>([]);
@@ -117,132 +118,194 @@ export default function EditTourForm({ tour }: { tour: Tour }) {
       className="space-y-6 bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow"
     >
       {/* Title */}
-      <input
-        type="text"
-        placeholder="Title"
-        value={formData.title}
-        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        className="w-full p-3 border rounded-lg dark:bg-zinc-800"
-        required
-      />
+      <div>
+        <label htmlFor="title" className="block mb-2 font-medium">
+          Title
+        </label>
+        <input
+          id="title"
+          type="text"
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          className="w-full p-3 border rounded-lg dark:bg-zinc-800"
+          required
+        />
+      </div>
 
       {/* Description */}
-      <textarea
-        placeholder="Description"
-        value={formData.description}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            description: e.target.value,
-          })
-        }
-        className="w-full p-3 border rounded-lg dark:bg-zinc-800 min-h-32"
-        required
-      />
+      <div>
+        <label htmlFor="description" className="block mb-2 font-medium">
+          Description
+        </label>
+        <textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          className="w-full p-3 border rounded-lg dark:bg-zinc-800 min-h-32"
+          required
+        />
+      </div>
 
       {/* Price & Duration */}
       <div className="grid grid-cols-2 gap-4">
-        <input
-          type="number"
-          placeholder="Price"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-          className="p-3 border rounded-lg dark:bg-zinc-800"
-          required
-        />
-        <input
-          type="number"
-          placeholder="Duration (hours)"
-          value={formData.duration}
-          onChange={(e) =>
+        <div>
+          <label htmlFor="price" className="block mb-2 font-medium">
+            Price
+          </label>
+          <input
+            id="price"
+            type="number"
+            value={formData.price}
+            onChange={(e) =>
+              setFormData({ ...formData, price: e.target.value })
+            }
+            className="w-full p-3 border rounded-lg dark:bg-zinc-800"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="duration" className="block mb-2 font-medium">
+            Duration (hours)
+          </label>
+          <input
+            id="duration"
+            type="number"
+            value={formData.duration}
+            onChange={(e) =>
+              setFormData({ ...formData, duration: e.target.value })
+            }
+            className="w-full p-3 border rounded-lg dark:bg-zinc-800"
+            required
+          />
+        </div>
+      </div>
+
+      {/* Tour Status Toggle */}
+      <div className="flex items-center justify-between p-4 border rounded-xl dark:bg-zinc-800">
+        <div>
+          <p className="font-medium">Tour Status</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            {formData.isActive
+              ? "This tour is visible to tourists"
+              : "This tour is hidden from tourists"}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          aria-label="Toggle Tour Status"
+          onClick={() =>
             setFormData({
               ...formData,
-              duration: e.target.value,
+              isActive: !formData.isActive,
             })
           }
-          className="p-3 border rounded-lg dark:bg-zinc-800"
-          required
-        />
+          className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 ${
+            formData.isActive ? "bg-green-600" : "bg-zinc-300 dark:bg-zinc-700"
+          }`}
+        >
+          <span
+            className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-md transition-transform duration-300 ${
+              formData.isActive ? "translate-x-7" : "translate-x-1"
+            }`}
+          />
+        </button>
       </div>
 
       {/* Meeting Point */}
-      <input
-        type="text"
-        placeholder="Meeting Point"
-        value={formData.meetingPoint}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            meetingPoint: e.target.value,
-          })
-        }
-        className="w-full p-3 border rounded-lg dark:bg-zinc-800"
-        required
-      />
-
-      {/* Max Group & City */}
-      <div className="grid grid-cols-2 gap-4">
+      <div>
+        <label htmlFor="meetingPoint" className="block mb-2 font-medium">
+          Meeting Point
+        </label>
         <input
-          type="number"
-          placeholder="Max Group Size"
-          value={formData.maxGroupSize}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              maxGroupSize: e.target.value,
-            })
-          }
-          className="p-3 border rounded-lg dark:bg-zinc-800"
-          required
-        />
-        <input
+          id="meetingPoint"
           type="text"
-          placeholder="City"
-          value={formData.city}
+          value={formData.meetingPoint}
           onChange={(e) =>
-            setFormData({
-              ...formData,
-              city: e.target.value,
-            })
+            setFormData({ ...formData, meetingPoint: e.target.value })
           }
-          className="p-3 border rounded-lg dark:bg-zinc-800"
+          className="w-full p-3 border rounded-lg dark:bg-zinc-800"
           required
         />
       </div>
 
+      {/* Max Group & City */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="maxGroupSize" className="block mb-2 font-medium">
+            Max Group Size
+          </label>
+          <input
+            id="maxGroupSize"
+            type="number"
+            value={formData.maxGroupSize}
+            onChange={(e) =>
+              setFormData({ ...formData, maxGroupSize: e.target.value })
+            }
+            className="w-full p-3 border rounded-lg dark:bg-zinc-800"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="city" className="block mb-2 font-medium">
+            City
+          </label>
+          <input
+            id="city"
+            type="text"
+            value={formData.city}
+            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            className="w-full p-3 border rounded-lg dark:bg-zinc-800"
+            required
+          />
+        </div>
+      </div>
+
       {/* Itinerary */}
-      <textarea
-        placeholder="Itinerary"
-        value={formData.itinerary}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            itinerary: e.target.value,
-          })
-        }
-        className="w-full p-3 border rounded-lg dark:bg-zinc-800 min-h-32"
-        required
-      />
+      <div>
+        <label htmlFor="itinerary" className="block mb-2 font-medium">
+          Itinerary
+        </label>
+        <textarea
+          id="itinerary"
+          value={formData.itinerary}
+          onChange={(e) =>
+            setFormData({ ...formData, itinerary: e.target.value })
+          }
+          className="w-full p-3 border rounded-lg dark:bg-zinc-800 min-h-32"
+          required
+        />
+      </div>
 
       {/* Category */}
-      <input
-        type="text"
-        placeholder="Category"
-        value={formData.category}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            category: e.target.value,
-          })
-        }
-        className="w-full p-3 border rounded-lg dark:bg-zinc-800"
-        required
-      />
+      <div>
+        <label htmlFor="category" className="block mb-2 font-medium">
+          Category
+        </label>
+        <input
+          id="category"
+          type="text"
+          value={formData.category}
+          onChange={(e) =>
+            setFormData({ ...formData, category: e.target.value })
+          }
+          className="w-full p-3 border rounded-lg dark:bg-zinc-800"
+          required
+        />
+      </div>
 
       {/* Languages */}
+
+      <label htmlFor="languages" className="block mb-2 font-medium">
+        Languages (comma separated)
+      </label>
       <input
+        id="languages"
         type="text"
-        placeholder="Languages (comma separated)"
         value={formData.languages.join(", ")}
         onChange={(e) =>
           setFormData({

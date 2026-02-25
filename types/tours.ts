@@ -12,4 +12,5 @@ export interface Tour {
     languages: string[];
     images: string[];
     slug: string;
+    isActive: boolean
 }

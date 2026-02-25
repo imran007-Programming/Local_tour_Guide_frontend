@@ -1,6 +1,6 @@
 "use client";
 
-import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, MapPin } from "lucide-react";
 import { Marquee } from "@/components/ui/marquee";
 export default function Footer() {
   return (
@@ -108,8 +108,9 @@ export default function Footer() {
       {/* ===== App + Support Section ===== */}
       <div className="max-w-7xl mx-auto px-6 pb-12">
         <div className="bg-white dark:bg-zinc-900 rounded-xl px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md dark:shadow-none transition">
-          <div className="text-2xl font-bold text-zinc-900 dark:text-white">
-            🌍 DreamsTour
+          <div className="text-2xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+            <MapPin className="text-red-500" size={28} />
+            TourGuide
           </div>
 
           <div className="flex items-center gap-4">
@@ -143,7 +144,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Copyright © 2025. All Rights Reserved,{" "}
-            <span className="text-red-500">DreamsTour</span>
+            <span className="text-red-500">TourGuide</span>
           </p>
 
           <div className="flex gap-6 text-zinc-600 dark:text-zinc-400">

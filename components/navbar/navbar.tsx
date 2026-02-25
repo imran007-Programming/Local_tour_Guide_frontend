@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
-import { Menu, X } from "lucide-react";
+import { Menu, X, MapPin } from "lucide-react";
 import SignInModal from "../Auth/Login";
 import { Button } from "../ui/button";
 import RegisterModal from "../Auth/Register";
@@ -24,8 +24,22 @@ export default function Navbar({ user }: { user?: User }) {
       setScrolled(window.scrollY > 80);
     };
 
+    const handleOpenSignIn = () => {
+      setOpen(true);
+    };
+
+    const handleOpenRegister = () => {
+      setRegisterOpen(true);
+    };
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("openSignInModal", handleOpenSignIn);
+    window.addEventListener("openAuthModal", handleOpenRegister);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("openSignInModal", handleOpenSignIn);
+      window.removeEventListener("openAuthModal", handleOpenRegister);
+    };
   }, []);
   const handleLogout = async () => {
     try {
@@ -63,23 +77,28 @@ export default function Navbar({ user }: { user?: User }) {
           ${
             scrolled
               ? "dark:bg-black bg-white shadow-md py-4"
-              : "mt-12 bg-transparent py-4"
+              : "mt-7 bg-transparent py-4"
           }`}
       >
         <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
           {/* LOGO */}
           <Link
             href="/"
-            className={`text-xl font-bold transition-colors duration-500 ${
+            className={`text-xl font-bold flex items-center gap-2 transition-colors duration-500 ${
               scrolled ? "text-black dark:text-white" : "text-white"
             }`}
           >
-            🌍 DreamsTour
+            <MapPin className="text-red-500" size={24} />
+            TourGuide
           </Link>
 
           {/* DESKTOP MENU */}
           <nav className="hidden  md:flex items-center gap-8 text-sm font-medium">
-            <NavItem href="" label="Explore Tours" scrolled={scrolled} />
+            <NavItem
+              href="/explore"
+              label="Explore Tours"
+              scrolled={scrolled}
+            />
 
             {user?.data?.role === "TOURIST" && (
               <>
@@ -103,8 +122,16 @@ export default function Navbar({ user }: { user?: User }) {
                   label="Dashboard"
                   scrolled={scrolled}
                 />
-                <NavItem href="" label="My Listings" scrolled={scrolled} />
-                <NavItem href="" label="Profile" scrolled={scrolled} />
+                <NavItem
+                  href="/dashboard/listings"
+                  label="My Listings"
+                  scrolled={scrolled}
+                />
+                <NavItem
+                  href="/dashboard/profile"
+                  label="Profile"
+                  scrolled={scrolled}
+                />
               </>
             )}
 
@@ -115,9 +142,21 @@ export default function Navbar({ user }: { user?: User }) {
                   label="Admin Dashboard"
                   scrolled={scrolled}
                 />
-                <NavItem href="" label="Manage Users" scrolled={scrolled} />
-                <NavItem href="" label="Manage Listings" scrolled={scrolled} />
-                <NavItem href="" label="Profile" scrolled={scrolled} />
+                <NavItem
+                  href="/dashboard/users"
+                  label="Manage Users"
+                  scrolled={scrolled}
+                />
+                <NavItem
+                  href="/dashboard/listings"
+                  label="Manage Listings"
+                  scrolled={scrolled}
+                />
+                <NavItem
+                  href="/dashboard/profile"
+                  label="Profile"
+                  scrolled={scrolled}
+                />
               </>
             )}
           </nav>
@@ -213,7 +252,10 @@ export default function Navbar({ user }: { user?: User }) {
             <div className="flex flex-col h-full">
               {/* HEADER */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-                <h2 className="text-lg font-bold">🌍 DreamsTour</h2>
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <MapPin className="text-red-500" size={20} />
+                  TourGuide
+                </h2>
 
                 <button
                   onClick={() => setMobileOpen(false)}

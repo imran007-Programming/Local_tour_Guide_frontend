@@ -3,12 +3,14 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { X, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormValues, loginSchema } from "./ValidationSchema";
 import { BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
+import { Spinner } from "../ui/spinner";
 
 interface SignInModalProps {
   open: boolean;
@@ -32,7 +34,6 @@ export default function SignInModal({
   const router = useRouter();
 
   const onSubmit = async (data: LoginFormValues) => {
-    console.log("Login Data:", data);
     try {
       const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
@@ -43,15 +44,17 @@ export default function SignInModal({
         body: JSON.stringify(data),
       });
       const result = await res.json();
-      if (result.success) {
-        router.push("/dashboard");
-      }
-      console.log(result);
-    } catch (error) {
-      console.log(error);
-    }
 
-    setOpen(false);
+      if (result.success) {
+        toast.success("Login successful!");
+        setOpen(false);
+        router.push("/dashboard");
+      } else {
+        toast.error(result.message || "Invalid credentials");
+      }
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -160,9 +163,16 @@ export default function SignInModal({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50"
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {isSubmitting ? "Logging in..." : "Login →"}
+            {isSubmitting ? (
+              <>
+                <Spinner size="sm" className="border-white" />
+                Logging in...
+              </>
+            ) : (
+              "Login →"
+            )}
           </button>
 
           {/* Switch to Register */}

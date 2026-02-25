@@ -1,15 +1,35 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { BASE_URL } from "@/lib/config";
 
 export default function TourSearchBar() {
   const router = useRouter();
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
-
   const [guests, setGuests] = useState(1);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const res = await fetch(`${BASE_URL}/tour/categories`);
+      if (res?.ok) {
+        const data = await res.json();
+        setCategories(data.data || []);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleSearch = () => {
     router.push(
@@ -18,7 +38,10 @@ export default function TourSearchBar() {
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ y: 100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5 }}
       className="mt-10 w-full max-w-5xl rounded-2xl
   bg-white dark:bg-zinc-900
   shadow-xl dark:shadow-lg
@@ -60,24 +83,19 @@ export default function TourSearchBar() {
           <label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
             Category
           </label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 w-full rounded-lg border
-          border-gray-300 dark:border-zinc-700
-          bg-white dark:bg-zinc-800
-          text-black dark:text-white
-          px-3 py-2 text-sm outline-none
-          focus:ring-2 focus:ring-red-500
-          transition"
-          >
-            <option value="">All Categories</option>
-            <option value="NATURE">Nature</option>
-            <option value="ADVENTURE">Adventure</option>
-            <option value="CULTURE">Culture</option>
-            <option value="FOOD">Food</option>
-            <option value="HISTORICAL">Historical</option>
-          </select>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="mt-1 w-full">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent className="w-full">
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat.charAt(0) + cat.slice(1).toLowerCase()}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Guests */}
@@ -85,23 +103,18 @@ export default function TourSearchBar() {
           <label className="text-xs font-semibold text-gray-500 dark:text-gray-400">
             Guests
           </label>
-          <select
-            value={guests}
-            onChange={(e) => setGuests(Number(e.target.value))}
-            className="mt-1 w-full rounded-lg border
-          border-gray-300 dark:border-zinc-700
-          bg-white dark:bg-zinc-800
-          text-black dark:text-white
-          px-3 py-2 text-sm outline-none
-          focus:ring-2 focus:ring-red-500
-          transition"
-          >
-            {[1, 2, 3, 4, 5, 6].map((g) => (
-              <option key={g} value={g}>
-                {g} Guest{g > 1 ? "s" : ""}
-              </option>
-            ))}
-          </select>
+          <Select value={guests.toString()} onValueChange={(v) => setGuests(Number(v))}>
+            <SelectTrigger className="mt-1 w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="w-full">
+              {[1, 2, 3, 4, 5, 6].map((g) => (
+                <SelectItem key={g} value={g.toString()}>
+                  {g} Guest{g > 1 ? "s" : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Search button */}
@@ -116,6 +129,6 @@ export default function TourSearchBar() {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

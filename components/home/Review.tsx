@@ -3,91 +3,28 @@
 import Image from "next/image";
 import { motion, Variants } from "framer-motion";
 import useEmblaCarousel from "embla-carousel-react";
-import { useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { authFetch } from "@/lib/authFetch";
+import { BASE_URL } from "@/lib/config";
 
-const reviews = [
-  {
-    title: "Easy to Find your Leisure Place",
-    text: "Thanks for arranging a smooth travel experience for us. Our cab driver was polite, timely, and helpful. The team ensured making it a stress-free trip.",
-    name: "Prajakta Sasane",
-    location: "Paris, France",
-    rating: 5.0,
-    image: "/reviews/user1.jpg",
-  },
-  {
-    title: "Fantastic Family Experience",
-    text: "We had a fantastic time as a family. There were activities for every age group, and the kids loved the fun experiences and great hospitality.",
-    name: "James Andrew",
-    location: "New York, United States",
-    rating: 4.9,
-    image: "/reviews/user2.jpg",
-  },
-  {
-    title: "Great Hospitality",
-    text: "Dream Tours is the only way to go. We had the time of our life on our trip. The customer service was wonderful & the staff was very helpful.",
-    name: "Andrew Fetcher",
-    location: "Los Angeles, United States",
-    rating: 5.0,
-    image: "/reviews/user3.jpg",
-  },
-  {
-    title: "Smooth Booking Process",
-    text: "The booking experience was seamless and transparent. Everything was well organized, and we received constant updates throughout the trip.",
-    name: "Sophia Martinez",
-    location: "Barcelona, Spain",
-    rating: 4.8,
-    image: "/reviews/user4.jpg",
-  },
-  {
-    title: "Highly Recommended",
-    text: "From airport pickup to hotel arrangements, everything was handled professionally. I would definitely recommend Dream Tours to my friends.",
-    name: "Daniel Kim",
-    location: "Seoul, South Korea",
-    rating: 4.9,
-    image: "/reviews/user5.jpg",
-  },
-  {
-    title: "Memorable Adventure",
-    text: "This was one of the best adventures of my life. The guides were knowledgeable, friendly, and always ready to help.",
-    name: "Emma Thompson",
-    location: "Sydney, Australia",
-    rating: 5.0,
-    image: "/reviews/user6.jpg",
-  },
-  {
-    title: "Exceptional Support",
-    text: "Customer support was available whenever we needed assistance. Their response time was impressive and very reassuring.",
-    name: "Mohammed Ali",
-    location: "Dubai, UAE",
-    rating: 4.7,
-    image: "/reviews/user7.jpg",
-  },
-  {
-    title: "Well Organized Tours",
-    text: "Every tour was well structured and informative. We never felt rushed, and we had enough time to explore each destination.",
-    name: "Olivia Brown",
-    location: "London, UK",
-    rating: 4.8,
-    image: "/reviews/user8.jpg",
-  },
-  {
-    title: "Luxury Experience",
-    text: "The accommodations were luxurious and comfortable. The entire journey felt premium and thoughtfully curated.",
-    name: "Lucas Schneider",
-    location: "Berlin, Germany",
-    rating: 5.0,
-    image: "/reviews/user9.jpg",
-  },
-  {
-    title: "Unforgettable Trip",
-    text: "Our honeymoon trip was unforgettable thanks to Dream Tours. Everything exceeded our expectations.",
-    name: "Isabella Rossi",
-    location: "Rome, Italy",
-    rating: 4.9,
-    image: "/reviews/user10.jpg",
-  },
-];
+interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  tourist: {
+    user: {
+      name: string;
+      profilePic: string | null;
+    };
+  };
+  booking: {
+    tour: {
+      title: string;
+      city: string;
+    };
+  };
+}
 
 const sectionVariant: Variants = {
   hidden: { opacity: 0, y: 100 },
@@ -108,12 +45,26 @@ const childVariant: Variants = {
 };
 
 export default function Reviews() {
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     align: "start",
     containScroll: "trimSnaps",
     duration: 50,
   });
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const res = await authFetch(`${BASE_URL}/reviews`, { cache: "no-store" });
+
+      if (res?.ok) {
+        const data = await res.json();
+        console.log(data.data);
+        setReviews(data.data || []);
+      }
+    };
+    fetchReviews();
+  }, []);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
@@ -148,24 +99,15 @@ export default function Reviews() {
         <motion.div variants={childVariant} className="mt-16">
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex">
-              {reviews.map((review, index) => (
-                <div key={index} className="flex-[0_0_360px] px-4">
-                  <div
-                    className="
-            h-[320px]
-            bg-white
-            dark:bg-zinc-800
-            shadow-lg
-            p-8
-            transition
-          "
-                  >
+              {reviews.map((review) => (
+                <div key={review.id} className="flex-[0_0_360px] px-4">
+                  <div className="h-[320px] bg-white dark:bg-zinc-800 shadow-lg p-8 transition">
                     <h3 className="font-semibold text-lg dark:text-white">
-                      {review.title}
+                      {review.booking.tour.title}
                     </h3>
 
                     <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm leading-relaxed line-clamp-4">
-                      {review.text}
+                      {review.comment}
                     </p>
 
                     <div className="border-t border-gray-200 dark:border-zinc-700 my-6"></div>
@@ -173,25 +115,40 @@ export default function Reviews() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <Image
-                          src={review.image}
-                          alt={review.name}
+                          src={review.tourist.user.profilePic || "/avatar.png"}
+                          alt={review.tourist.user.name}
                           width={40}
                           height={40}
-                          className="object-cover"
+                          className="object-cover rounded-full"
                         />
                         <div>
                           <p className="font-semibold dark:text-white">
-                            {review.name}
+                            {review.tourist.user.name}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {review.location}
+                            {review.booking.tour.city}
                           </p>
                         </div>
                       </div>
 
-                      <span className="font-semibold dark:text-white">
-                        {review.rating}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={16}
+                              className={
+                                star <= Math.round(review.rating)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-300"
+                              }
+                            />
+                          ))}
+                        </div>
+                        <span className="font-semibold dark:text-white">
+                          {review.rating.toFixed(1)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>

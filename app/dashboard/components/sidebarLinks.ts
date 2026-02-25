@@ -24,8 +24,8 @@ export const getSectionsByRole = (role: string) => {
                 title: "Main",
                 items: [
                     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-                    { href: "/dashboard/bookings", icon: Calendar, label: "Upcoming Bookings" },
                     { href: "/dashboard/requests", icon: Bell, label: "Pending Requests" },
+                    { href: "/dashboard/bookings", icon: Calendar, label: "Upcoming Bookings" },
                     { href: "/dashboard/listings", icon: Map, label: "My Listings" },
                     { href: "/dashboard/reviews", icon: Star, label: "Reviews" },
                 ],
