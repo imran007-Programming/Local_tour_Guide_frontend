@@ -97,7 +97,7 @@ export default function Sidebar({ user, onClose }: { user: User | undefined; onC
       </div>
 
       {/* Logout Section */}
-      <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
+      <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 lg:mt-0 mt-auto pb-4 lg:pb-0">
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 mt-4 rounded-xl
