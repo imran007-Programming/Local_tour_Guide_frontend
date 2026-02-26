@@ -11,6 +11,7 @@ import { LoginFormValues, loginSchema } from "./ValidationSchema";
 import { Spinner } from "../ui/spinner";
 import { BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
+import { setAuthCookies } from "@/app/actions/loginAction";
 
 interface SignInModalProps {
   open: boolean;
@@ -49,17 +50,15 @@ export default function SignInModal({
       });
 
       const result = await res.json();
-      
+
       if (!result.success) {
         toast.error(result.message || "Invalid credentials");
         return;
       }
-
+      await setAuthCookies(result.data.accessToken);
+      router.push("/dashboard");
       toast.success("Login successful!");
       setOpen(false);
-      
-      // Force a full page reload to ensure cookies are properly set
-      window.location.href = "/dashboard";
     } catch (error) {
       console.error(error);
       toast.error("Login failed");

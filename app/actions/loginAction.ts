@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 export async function setAuthCookies(
     accessToken: string,
-    refreshToken: string
+
 ) {
     const cookieStore = await cookies();
 
@@ -17,13 +17,6 @@ export async function setAuthCookies(
         maxAge: 60 * 1000
     });
 
-    cookieStore.set("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        path: "/",
-        maxAge: 90 * 24 * 60 * 60 * 1000,
 
-    });
-    redirect("/dashboard");
+
 }
