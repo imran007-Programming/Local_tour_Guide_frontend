@@ -9,10 +9,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormValues, loginSchema } from "./ValidationSchema";
 import { Spinner } from "../ui/spinner";
-import { setAuthCookies } from "@/app/actions/loginAction";
 import { BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
-import { se } from "date-fns/locale";
 
 interface SignInModalProps {
   open: boolean;
@@ -40,10 +38,10 @@ export default function SignInModal({
     try {
       const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({
           email: data.email,
           password: data.password,
@@ -51,23 +49,20 @@ export default function SignInModal({
       });
 
       const result = await res.json();
-      if (result.success) {
-        toast.success("Login successfully");
-        await setAuthCookies(result.data.accessToken, result.data.refreshToken);
-      }
-
+      
       if (!result.success) {
         toast.error(result.message || "Invalid credentials");
         return;
       }
 
       toast.success("Login successful!");
-
       setOpen(false);
-
-      router.refresh();
+      
+      // Force a full page reload to ensure cookies are properly set
+      window.location.href = "/dashboard";
     } catch (error) {
       console.error(error);
+      toast.error("Login failed");
     } finally {
       setIsLoading(false);
     }
