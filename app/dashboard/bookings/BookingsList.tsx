@@ -108,18 +108,12 @@ export default function BookingsList({
         if (sessionId) {
           try {
             // Verify payment status with backend
-            const res = await fetch(`${BASE_URL}/payments/verify-session/${sessionId}`, {
-              credentials: "include",
-            });
+            const res = await authFetch(`${BASE_URL}/payments/verify-session/${sessionId}`);
             
             if (res.ok) {
               const data = await res.json();
-              // Update booking status locally
-              setBookings((prev) =>
-                prev.map((b) =>
-                  b.id === data.bookingId ? { ...b, paymentStatus: "COMPLETED" } : b
-                )
-              );
+              // Refetch bookings to get updated status
+              window.location.href = window.location.pathname;
             }
           } catch (error) {
             console.error("Payment verification failed:", error);
