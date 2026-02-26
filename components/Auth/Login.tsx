@@ -55,7 +55,7 @@ export default function SignInModal({
         toast.error(result.message || "Invalid credentials");
         return;
       }
-      await setAuthCookies(result.data.accessToken);
+      await setAuthCookies(result.data.accessToken, result.data.refreshToken);
       router.push("/dashboard");
       toast.success("Login successful!");
       setOpen(false);
