@@ -58,7 +58,7 @@ export default function Sidebar({ user, onClose }: { user: User | undefined; onC
       </div>
 
       {/* Navigation Sections */}
-      <div className="flex-1 space-y-8">
+      <div className="space-y-8 lg:flex-1">
         {sections.map((section) => (
           <div key={section.title}>
             <p className="text-xs font-semibold text-zinc-400 uppercase mb-3">
@@ -97,7 +97,7 @@ export default function Sidebar({ user, onClose }: { user: User | undefined; onC
       </div>
 
       {/* Logout Section */}
-      <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 lg:mt-0 mt-auto pb-4 lg:pb-0">
+      <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 mt-6 lg:mt-auto pb-4 lg:pb-0">
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 mt-4 rounded-xl
