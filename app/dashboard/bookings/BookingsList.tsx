@@ -112,13 +112,13 @@ export default function BookingsList({
             setTimeout(() => {
               setShowSuccess(false);
               window.location.href = window.location.pathname;
-            }, 3000);
+            }, 5000);
           })
           .catch(() => {
             toast.success("Payment successful!");
             setTimeout(() => {
               window.location.href = window.location.pathname;
-            }, 2000);
+            }, 5000);
           });
       }
     };
