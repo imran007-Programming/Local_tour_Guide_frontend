@@ -103,23 +103,6 @@ export default function BookingsList({
   useEffect(() => {
     const handlePaymentSuccess = async () => {
       if (searchParams.get("payment") === "success") {
-        const sessionId = searchParams.get("session_id");
-        
-        if (sessionId) {
-          try {
-            // Verify payment status with backend
-            const res = await authFetch(`${BASE_URL}/payments/verify-session/${sessionId}`);
-            
-            if (res.ok) {
-              const data = await res.json();
-              // Refetch bookings to get updated status
-              window.location.href = window.location.pathname;
-            }
-          } catch (error) {
-            console.error("Payment verification failed:", error);
-          }
-        }
-
         fetch("/payment_success/success.json")
           .then((res) => res.json())
           .then((data) => {
@@ -128,10 +111,15 @@ export default function BookingsList({
             toast.success("Payment successful!");
             setTimeout(() => {
               setShowSuccess(false);
-              window.history.replaceState({}, "", window.location.pathname);
+              window.location.href = window.location.pathname;
             }, 3000);
           })
-          .catch(() => toast.error("Animation load failed"));
+          .catch(() => {
+            toast.success("Payment successful!");
+            setTimeout(() => {
+              window.location.href = window.location.pathname;
+            }, 2000);
+          });
       }
     };
 
