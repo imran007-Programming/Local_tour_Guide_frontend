@@ -19,7 +19,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-[#070A13]">
       {/* Full Width Header */}
-      <Header />
+      <Header user={user} />
 
       {/* Full Width Breadcrumb */}
       <BreadcrumbBanner />

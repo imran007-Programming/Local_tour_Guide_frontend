@@ -9,7 +9,7 @@ import { LogOut } from "lucide-react";
 import { logoutAction } from "@/app/actions/logoutAction";
 import { BASE_URL } from "@/lib/config";
 
-export default function Sidebar({ user }: { user: User | undefined }) {
+export default function Sidebar({ user, onClose }: { user: User | undefined; onClose?: () => void }) {
   const pathname = usePathname();
 
   const sections = getSectionsByRole(user?.data?.role || "");
@@ -19,7 +19,15 @@ export default function Sidebar({ user }: { user: User | undefined }) {
       method: "POST",
       credentials: "include",
     });
+    
+    // Clear browser history
+    window.history.replaceState(null, '', '/');
+    
     await logoutAction();
+  };
+
+  const handleLinkClick = () => {
+    if (onClose) onClose();
   };
 
   return (
@@ -65,6 +73,7 @@ export default function Sidebar({ user }: { user: User | undefined }) {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={handleLinkClick}
                     className={`
                       group flex items-center justify-between px-4 py-3 rounded-xl
                       transition-all duration-300

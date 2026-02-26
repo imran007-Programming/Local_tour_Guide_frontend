@@ -234,8 +234,8 @@ export default function BookingsList({
       <div className="space-y-4">
         {/* Test button - Remove in production */}
         {/* <Button onClick={() => window.location.href = '/dashboard/bookings/cancel'} variant="outline">Test Cancel Page</Button> */}
-        <div className="flex gap-4 items-center">
-          <div className="relative flex-1">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-wrap">
+          <div className="relative flex-1 w-full sm:w-auto min-w-[200px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search by tour, tourist name or email..."
@@ -246,7 +246,7 @@ export default function BookingsList({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">Status: {statusFilter || "All"}</Button>
+              <Button variant="outline" className="w-full sm:w-auto">Status: {statusFilter || "All"}</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setStatusFilter("")}>
@@ -268,7 +268,7 @@ export default function BookingsList({
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">Sort: {sortBy}</Button>
+              <Button variant="outline" className="w-full sm:w-auto">Sort: {sortBy}</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setSortBy("createdAt")}>
@@ -281,7 +281,7 @@ export default function BookingsList({
           </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-auto">
                 {sortOrder === "asc" ? "↑" : "↓"}
               </Button>
             </DropdownMenuTrigger>
@@ -307,15 +307,15 @@ export default function BookingsList({
             {bookings.map((booking) => (
               <div
                 key={booking.id}
-                className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow"
+                className="bg-white dark:bg-zinc-900 p-4 sm:p-6 rounded-lg shadow"
               >
-                <div className="flex gap-4 mb-4">
+                <div className="flex flex-col sm:flex-row gap-4 mb-4">
                   <Image
                     src={booking.tour.images[0] || "/placeholder.jpg"}
                     alt={booking.tour.title}
                     width={150}
                     height={100}
-                    className="rounded-lg object-cover"
+                    className="rounded-lg object-cover w-full sm:w-[150px] h-[200px] sm:h-[100px]"
                   />
                   <div className="flex-1">
                     <h3 className="text-xl font-bold mb-2">
@@ -374,7 +374,7 @@ export default function BookingsList({
                         </p>
                       )}
                   </div>
-                  <div className="text-right flex flex-col justify-between">
+                  <div className="flex flex-row sm:flex-col justify-between sm:justify-start sm:text-right gap-4 sm:gap-0">
                     <p className="text-2xl font-bold text-red-600">
                       ${booking.tour.price}
                     </p>
@@ -424,7 +424,7 @@ export default function BookingsList({
                       )}
                   </div>
                 </div>
-                <div className="flex justify-between items-center pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                   <div className="text-gray-600 dark:text-gray-400">
                     Payment Status:{" "}
                     <span
