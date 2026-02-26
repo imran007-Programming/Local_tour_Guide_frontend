@@ -7,6 +7,7 @@ export default async function MainLayout({
   children: React.ReactNode;
 }) {
   const user = await getCurrentUser();
+
   return (
     <>
       <Navbar user={user} />

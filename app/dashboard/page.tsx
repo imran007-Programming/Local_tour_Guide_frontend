@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/");
+  // if (!user) redirect("/");
 
   return <DashboardHome user={user} />;
 }

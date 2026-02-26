@@ -73,7 +73,7 @@ export default function TourReviews({
           const res = await authFetch(`${BASE_URL}/bookings/me`);
           if (res?.ok) {
             const result = await res.json();
-            console.log(result.data.data);
+
             const completedBookings = result.data.data.filter(
               (b: Booking) => b.tour.id === tourId && b.status === "COMPLETED",
             );

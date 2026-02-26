@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormValues, loginSchema } from "./ValidationSchema";
+import { Spinner } from "../ui/spinner";
+import { setAuthCookies } from "@/app/actions/loginAction";
 import { BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
-import { Spinner } from "../ui/spinner";
+import { se } from "date-fns/locale";
 
 interface SignInModalProps {
   open: boolean;
@@ -31,29 +33,43 @@ export default function SignInModal({
     resolver: zodResolver(loginSchema),
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
   const onSubmit = async (data: LoginFormValues) => {
+    setIsLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        credentials: "include",
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
       });
-      const result = await res.json();
 
+      const result = await res.json();
       if (result.success) {
-        toast.success("Login successful!");
-        setOpen(false);
-        router.push("/dashboard");
-      } else {
-        toast.error(result.message || "Invalid credentials");
+        toast.success("Login successfully");
+        await setAuthCookies(result.data.accessToken, result.data.refreshToken);
       }
+
+      if (!result.success) {
+        toast.error(result.message || "Invalid credentials");
+        return;
+      }
+
+      toast.success("Login successful!");
+
+      setOpen(false);
+
+      router.refresh();
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -79,7 +95,7 @@ export default function SignInModal({
           <DialogTitle className="text-2xl cursor-pointer font-bold text-zinc-900 dark:text-white">
             Sign In
           </DialogTitle>
-          <button onClick={() => setOpen(false)}>
+          <button onClick={() => setOpen(false)} className="cursor-pointer">
             <X className="cursor-pointer" />
           </button>
         </div>
@@ -135,7 +151,7 @@ export default function SignInModal({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-red-500"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-red-500 cursor-pointer"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -163,7 +179,7 @@ export default function SignInModal({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >
             {isSubmitting ? (
               <>
@@ -181,12 +197,48 @@ export default function SignInModal({
               setRegisterOpen(true);
               setOpen(false);
             }}
-            className="text-center text-sm text-zinc-600 dark:text-zinc-400"
+            className="text-center text-sm text-zinc-600 dark:text-zinc-400 cursor-pointer"
           >
             Don’t have an account?{" "}
             <span className="text-red-500 cursor-pointer">Sign up</span>
           </div>
         </form>
+
+        {/* Quick Login Buttons */}
+        <div className="pt-4 border-t dark:border-zinc-700">
+          <p className="text-xs text-center text-zinc-500 dark:text-zinc-400 mb-3">
+            Quick Login (Demo)
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                onSubmit({ email: "admin@gmail.com", password: "123456" })
+              }
+              className="px-3 py-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer"
+            >
+              Admin
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                onSubmit({ email: "guide@gmail.com", password: "123456" })
+              }
+              className="px-3 py-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer"
+            >
+              Guide
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                onSubmit({ email: "tourist@gmail.com", password: "123456" })
+              }
+              className="px-3 py-2 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 transition cursor-pointer"
+            >
+              Tourist
+            </button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -66,7 +66,7 @@ export default function HeroSection() {
       </div>
 
       {/* HERO CONTENT  */}
-      <div className="relative z-10 flex h-full flex-col items-center justify-center text-center px-6">
+      <div className="relative z-10 flex h-full flex-col items-center justify-center text-center px-6 pt-20 md:pt-0">
         <div className="max-w-3xl text-white">
           <h1 className="text-4xl md:text-6xl font-extrabold">
             {slides[selectedIndex].title}

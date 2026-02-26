@@ -4,9 +4,9 @@ import { useState, FormEvent } from "react";
 import { BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
-import { authFetch } from "@/lib/authFetch";
 import Image from "next/image";
 import { toast } from "sonner";
+import { authFetch } from "@/lib/authFetch";
 
 export default function ProfileForm({ user }: { user: User }) {
   const router = useRouter();
@@ -59,6 +59,7 @@ export default function ProfileForm({ user }: { user: User }) {
       await authFetch(`${BASE_URL}/users/update-profile`, {
         method: "PATCH",
         body: formData,
+        // credentials: "include",
       });
 
       //  Role specific update
@@ -66,6 +67,7 @@ export default function ProfileForm({ user }: { user: User }) {
         await authFetch(`${BASE_URL}/tourists`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
+          // credentials: "include",
           body: JSON.stringify({
             preferences: preferences.split(",").map((p) => p.trim()),
           }),
@@ -76,6 +78,7 @@ export default function ProfileForm({ user }: { user: User }) {
         await authFetch(`${BASE_URL}/guides`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             expertise: expertise.split(",").map((e) => e.trim()),
             dailyRate: Number(dailyRate),

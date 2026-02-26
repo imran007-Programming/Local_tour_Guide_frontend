@@ -55,26 +55,57 @@ export default function DashboardPage({ user }: { user: User }) {
       const res = await authFetch(`${BASE_URL}${endpoint}`);
       if (res?.ok) {
         const data = await res.json();
-        
-        setStats(data.data || { totalBookings: 0, totalAmount: 0, averageValue: 0 });
-        
+
+        setStats(
+          data.data || { totalBookings: 0, totalAmount: 0, averageValue: 0 },
+        );
+
         // Handle chartData (convert object to array)
         if (data.data?.chartData) {
-          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-          const monthlyArray = months.map(month => ({
+          const months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+          const monthlyArray = months.map((month) => ({
             month,
-            bookings: data.data.chartData[month] || 0
+            bookings: data.data.chartData[month] || 0,
           }));
           setMonthlyData(monthlyArray);
         }
-        
+
         // Handle statusBreakdown (if exists)
         if (data.data?.statusBreakdown) {
           setBookingStats([
-            { name: "Completed", value: data.data.statusBreakdown.COMPLETED || 0, color: "#22C55E" },
-            { name: "Pending", value: data.data.statusBreakdown.PENDING || 0, color: "#FACC15" },
-            { name: "Confirmed", value: data.data.statusBreakdown.CONFIRMED || 0, color: "#3B82F6" },
-            { name: "Cancelled", value: data.data.statusBreakdown.CANCELLED || 0, color: "#EF4444" },
+            {
+              name: "Completed",
+              value: data.data.statusBreakdown.COMPLETED || 0,
+              color: "#22C55E",
+            },
+            {
+              name: "Pending",
+              value: data.data.statusBreakdown.PENDING || 0,
+              color: "#FACC15",
+            },
+            {
+              name: "Confirmed",
+              value: data.data.statusBreakdown.CONFIRMED || 0,
+              color: "#3B82F6",
+            },
+            {
+              name: "Cancelled",
+              value: data.data.statusBreakdown.CANCELLED || 0,
+              color: "#EF4444",
+            },
           ]);
         }
       } else {
@@ -82,26 +113,26 @@ export default function DashboardPage({ user }: { user: User }) {
       }
     };
     fetchStats();
-  }, [user.data.role]);
+  }, [user?.data?.role]);
   return (
     <div className="min-h-screen bg-white dark:bg-[#0B0F19] text-black dark:text-white flex">
       {/* Main */}
       <div className="flex-1 p-6 space-y-6">
         {/* Top Stats */}
         <div className="grid md:grid-cols-3 gap-6">
-          <StatCard 
-            title="Total Bookings" 
-            value={stats.totalBookings.toString()} 
+          <StatCard
+            title="Total Bookings"
+            value={stats.totalBookings.toString()}
             icon={<Calendar className="h-8 w-8 text-red-600" />}
           />
-          <StatCard 
-            title="Total Amount" 
-            value={`$${stats.totalAmount.toFixed(2)}`} 
+          <StatCard
+            title="Total Amount"
+            value={`$${stats.totalAmount.toFixed(2)}`}
             icon={<DollarSign className="h-8 w-8 text-green-600" />}
           />
-          <StatCard 
-            title="Average Value" 
-            value={`$${stats.averageValue.toFixed(2)}`} 
+          <StatCard
+            title="Average Value"
+            value={`$${stats.averageValue.toFixed(2)}`}
             icon={<TrendingUp className="h-8 w-8 text-blue-600" />}
           />
         </div>
@@ -116,7 +147,11 @@ export default function DashboardPage({ user }: { user: User }) {
                 <BarChart data={monthlyData}>
                   <XAxis dataKey="month" stroke="#8884d8" />
                   <Tooltip />
-                  <Bar dataKey="bookings" fill="#EF4444" radius={[6, 6, 0, 0]} />
+                  <Bar
+                    dataKey="bookings"
+                    fill="#EF4444"
+                    radius={[6, 6, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -146,7 +181,10 @@ export default function DashboardPage({ user }: { user: User }) {
             </div>
             <div className="mt-4 space-y-2">
               {bookingStats.map((stat) => (
-                <div key={stat.name} className="flex items-center justify-between">
+                <div
+                  key={stat.name}
+                  className="flex items-center justify-between"
+                >
                   <div className="flex items-center gap-2">
                     <div
                       className="w-3 h-3 rounded-full"
@@ -160,13 +198,20 @@ export default function DashboardPage({ user }: { user: User }) {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
 }
 
-function StatCard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
+function StatCard({
+  title,
+  value,
+  icon,
+}: {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+}) {
   return (
     <div className="bg-white dark:bg-[#111827] border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6">
       <div className="flex items-center justify-between">

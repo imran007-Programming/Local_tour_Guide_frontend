@@ -1,43 +1,24 @@
-import { headers } from "next/headers";
+import { cookies } from "next/headers";
 import { BASE_URL } from "@/lib/config";
 
 export async function getCurrentUser() {
-    const headersList = await headers();
-    const cookie = headersList.get("cookie") || "";
+    const cookieStore = await cookies();
 
-    // 1️⃣ Try get user
-    let res = await fetch(`${BASE_URL}/auth/me`, {
+    const cookieHeader = cookieStore
+        .getAll()
+        .map((cookie) => `${cookie.name}=${cookie.value}`)
+        .join("; ");
+
+
+
+    const res = await fetch(`${BASE_URL}/auth/me`, {
         method: "GET",
-        headers: { cookie },
+        headers: {
+            cookie: cookieHeader,
+        },
+        credentials: "include",
         cache: "no-store",
     });
-
-    // If expired → create a new refreshToken
-    if (res.status === 401) {
-        const refreshRes = await fetch(`${BASE_URL}/auth/refreshToken`, {
-            method: "POST",
-            headers: { cookie },
-            cache: "no-store",
-        });
-
-        // If refresh failed → logout
-        if (!refreshRes.ok) return null;
-
-        // IMPORTANT:
-        // Extract new Set-Cookie from refresh response
-        const setCookie = refreshRes.headers.get("set-cookie");
-
-        if (!setCookie) return null;
-
-        // Retry /me with new cookie
-        res = await fetch(`${BASE_URL}/auth/me`, {
-            method: "GET",
-            headers: {
-                cookie: setCookie,
-            },
-            cache: "no-store",
-        });
-    }
 
     if (!res.ok) return null;
 

@@ -101,20 +101,47 @@ export default function BookingsList({
   };
 
   useEffect(() => {
-    if (searchParams.get("payment") === "success") {
-      fetch("/payment_success/success.json")
-        .then((res) => res.json())
-        .then((data) => {
-          setSuccessAnimation(data);
-          setShowSuccess(true);
-          toast.success("Payment successful!");
-          setTimeout(() => {
-            setShowSuccess(false);
-            window.history.replaceState({}, "", window.location.pathname);
-          }, 3000);
-        })
-        .catch(() => toast.error("Animation load failed"));
-    }
+    const handlePaymentSuccess = async () => {
+      if (searchParams.get("payment") === "success") {
+        const sessionId = searchParams.get("session_id");
+        
+        if (sessionId) {
+          try {
+            // Verify payment status with backend
+            const res = await fetch(`${BASE_URL}/payments/verify-session/${sessionId}`, {
+              credentials: "include",
+            });
+            
+            if (res.ok) {
+              const data = await res.json();
+              // Update booking status locally
+              setBookings((prev) =>
+                prev.map((b) =>
+                  b.id === data.bookingId ? { ...b, paymentStatus: "COMPLETED" } : b
+                )
+              );
+            }
+          } catch (error) {
+            console.error("Payment verification failed:", error);
+          }
+        }
+
+        fetch("/payment_success/success.json")
+          .then((res) => res.json())
+          .then((data) => {
+            setSuccessAnimation(data);
+            setShowSuccess(true);
+            toast.success("Payment successful!");
+            setTimeout(() => {
+              setShowSuccess(false);
+              window.history.replaceState({}, "", window.location.pathname);
+            }, 3000);
+          })
+          .catch(() => toast.error("Animation load failed"));
+      }
+    };
+
+    handlePaymentSuccess();
   }, [searchParams]);
 
   useEffect(() => {
@@ -167,20 +194,21 @@ export default function BookingsList({
   const handlePayment = async (bookingId: string) => {
     setPaymentLoading(bookingId);
     try {
-      const baseUrl = `${window.location.origin}${window.location.pathname}`;
-      const successUrl = `${baseUrl}?payment=success`;
+      const successUrl = `${window.location.origin}/dashboard/bookings?payment=success&session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = `${window.location.origin}/dashboard/bookings/cancel`;
 
       // First create payment intent to initialize payment record
-      await authFetch(`${BASE_URL}/payments/stripe/create-intent`, {
+      await fetch(`${BASE_URL}/payments/stripe/create-intent`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bookingId }),
       });
 
       // Then create checkout session with return URL
-      const res = await authFetch(`${BASE_URL}/payments/checkout`, {
+      const res = await fetch(`${BASE_URL}/payments/checkout`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingId,

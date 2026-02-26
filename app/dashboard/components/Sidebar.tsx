@@ -1,36 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-
-import { useState } from "react";
-import { BASE_URL } from "@/lib/config";
+import { usePathname } from "next/navigation";
 import { User } from "@/types/user";
 import Image from "next/image";
 import { getSectionsByRole } from "./sidebarLinks";
 import { LogOut } from "lucide-react";
+import { logoutAction } from "@/app/actions/logoutAction";
+import { BASE_URL } from "@/lib/config";
 
 export default function Sidebar({ user }: { user: User | undefined }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
 
   const sections = getSectionsByRole(user?.data?.role || "");
 
   const handleLogout = async () => {
-    try {
-      setLoading(true);
-      await fetch(`${BASE_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-      router.push("/");
-      router.refresh();
-    } catch (error) {
-      console.log("error", error);
-    } finally {
-      setLoading(false);
-    }
+    await fetch(`${BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+    await logoutAction();
   };
 
   return (
@@ -102,13 +91,12 @@ export default function Sidebar({ user }: { user: User | undefined }) {
       <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
         <button
           onClick={handleLogout}
-          disabled={loading}
           className="w-full flex items-center gap-3 px-4 py-3 mt-4 rounded-xl
                      bg-red-600 hover:bg-red-700 transition duration-300
-                     text-white disabled:opacity-50"
+                     text-white"
         >
           <LogOut size={18} />
-          {loading ? "Logging out..." : "Logout"}
+          Logout
         </button>
       </div>
     </aside>

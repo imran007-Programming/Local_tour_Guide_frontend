@@ -18,7 +18,7 @@ export default async function EditTourPage({
 }) {
   const { id: slug } = await params;
   const tour = await getTour(slug);
-  console.log(tour);
+
   if (!tour) {
     return <div>Tour not found</div>;
   }

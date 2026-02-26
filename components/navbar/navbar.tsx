@@ -7,9 +7,9 @@ import { Menu, X, MapPin } from "lucide-react";
 import SignInModal from "../Auth/Login";
 import { Button } from "../ui/button";
 import RegisterModal from "../Auth/Register";
-import { BASE_URL } from "@/lib/config";
-import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
+import { logoutAction } from "@/app/actions/logoutAction";
+import { BASE_URL } from "@/lib/config";
 
 export default function Navbar({ user }: { user?: User }) {
   const [scrolled, setScrolled] = useState(false);
@@ -17,7 +17,14 @@ export default function Navbar({ user }: { user?: User }) {
   const [open, setOpen] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [guideRegisterOpen, setGuideRegisterOpen] = useState(false);
-  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch(`${BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+    await logoutAction();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,18 +48,6 @@ export default function Navbar({ user }: { user?: User }) {
       window.removeEventListener("openAuthModal", handleOpenRegister);
     };
   }, []);
-  const handleLogout = async () => {
-    try {
-      await fetch(`${BASE_URL}/auth/logout`, {
-        method: "POST",
-
-        credentials: "include",
-      });
-      router.refresh();
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
 
   return (
     <header className="absolute top-0 left-0 w-full z-50">
@@ -267,59 +262,105 @@ export default function Navbar({ user }: { user?: User }) {
 
               {/* CONTENT */}
               <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-                {/* Wishlist */}
-                <div className="flex justify-between items-center bg-zinc-900 rounded-xl px-4 py-4">
-                  <span className="text-lg font-medium">Wishlist</span>
-                  <div className="relative">
-                    ❤️
-                    <span className="absolute -top-2 -right-2 text-xs bg-yellow-400 text-black rounded-full px-1">
-                      0
-                    </span>
-                  </div>
-                </div>
-
                 {/* MENU ITEMS */}
-                {["Explore", "My Bookings", "Dashboard", "Profile"].map(
-                  (item) => (
-                    <div
-                      key={item}
-                      className="flex justify-between items-center py-3 border-b border-white/10"
-                    >
-                      <span
-                        className={`text-base ${
-                          item === "Home" ? "text-red-500" : "text-white"
-                        }`}
-                      >
-                        {item}
-                      </span>
-                      <span className="text-xl">+</span>
-                    </div>
-                  ),
+                <Link href="/explore" onClick={() => setMobileOpen(false)}>
+                  <div className="flex justify-between items-center py-3 border-b border-white/10">
+                    <span className="text-base text-white">Explore Tours</span>
+                  </div>
+                </Link>
+
+                {user?.data?.role === "TOURIST" && (
+                  <>
+                    <Link href="/dashboard/bookings" onClick={() => setMobileOpen(false)}>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-base text-white">My Bookings</span>
+                      </div>
+                    </Link>
+                    <Link href="/dashboard/wishlist" onClick={() => setMobileOpen(false)}>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-base text-white">Wishlist</span>
+                      </div>
+                    </Link>
+                    <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-base text-white">Profile</span>
+                      </div>
+                    </Link>
+                  </>
                 )}
 
-                {/* LANGUAGE & CURRENCY */}
-                <div className="space-y-4 pt-4">
-                  <select className="w-full bg-zinc-900 border border-white/10 rounded-lg px-4 py-3 text-white">
-                    <option>🇺🇸 ENG</option>
-                    <option>🇧🇩 BN</option>
-                  </select>
+                {user?.data?.role === "GUIDE" && (
+                  <>
+                    <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-base text-white">Dashboard</span>
+                      </div>
+                    </Link>
+                    <Link href="/dashboard/listings" onClick={() => setMobileOpen(false)}>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-base text-white">My Listings</span>
+                      </div>
+                    </Link>
+                    <Link href="/dashboard/profile" onClick={() => setMobileOpen(false)}>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-base text-white">Profile</span>
+                      </div>
+                    </Link>
+                  </>
+                )}
 
-                  <select className="w-full bg-zinc-900 border border-white/10 rounded-lg px-4 py-3 text-white">
-                    <option>USD</option>
-                    <option>BDT</option>
-                  </select>
-                </div>
+                {user?.data?.role === "ADMIN" && (
+                  <>
+                    <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-base text-white">Admin Dashboard</span>
+                      </div>
+                    </Link>
+                    <Link href="/dashboard/users" onClick={() => setMobileOpen(false)}>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-base text-white">Manage Users</span>
+                      </div>
+                    </Link>
+                    <Link href="/dashboard/listings" onClick={() => setMobileOpen(false)}>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-base text-white">Manage Listings</span>
+                      </div>
+                    </Link>
+                  </>
+                )}
               </div>
 
               {/* FOOTER BUTTONS */}
               <div className="px-6 pb-6 space-y-4">
-                <button className="w-full bg-blue-900 rounded-full py-4 text-lg font-semibold">
-                  Sign In
-                </button>
-
-                <button className="w-full bg-red-600 rounded-full py-4 text-lg font-semibold">
-                  Become Expert
-                </button>
+                {user?.data ? (
+                  <button
+                    onClick={handleLogout}
+                    className="w-full bg-red-600 rounded-full py-4 text-lg font-semibold"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        setOpen(true);
+                        setMobileOpen(false);
+                      }}
+                      className="w-full bg-blue-900 rounded-full py-4 text-lg font-semibold"
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      onClick={() => {
+                        setGuideRegisterOpen(true);
+                        setMobileOpen(false);
+                      }}
+                      className="w-full bg-red-600 rounded-full py-4 text-lg font-semibold"
+                    >
+                      Become a Guide
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

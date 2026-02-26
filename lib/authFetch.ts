@@ -1,29 +1,32 @@
-import { BASE_URL } from "./config";
+export async function authFetch(
+    url: string,
+    options: RequestInit = {}
+) {
+    const isServer = typeof window === "undefined";
+    console.log(isServer)
 
-export async function authFetch(url: string, options: RequestInit = {}) {
-    let res = await fetch(url, {
-        ...options,
-        credentials: "include",
-    });
+    const headers: Record<string, string> = {
+        ...(options.headers as Record<string, string>),
+    };
 
-    if (res.status === 401) {
-        const refreshRes = await fetch(`${BASE_URL}/auth/refreshToken`, {
-            method: "POST",
-            credentials: "include",
-        });
 
-        if (!refreshRes.ok) {
-            if (typeof window !== "undefined") {
-                window.location.href = "/";
-            }
-            return null;
+    if (isServer) {
+        const { cookies } = await import("next/headers");
+        const cookieStore = await cookies();
+
+        const cookieHeader = cookieStore
+            .getAll()
+            .map((cookie) => `${cookie.name}=${cookie.value}`)
+            .join("; ");
+
+        if (cookieHeader) {
+            headers.cookie = cookieHeader;
         }
-
-        res = await fetch(url, {
-            ...options,
-            credentials: "include",
-        });
     }
 
-    return res;
+    return fetch(url, {
+        ...options,
+        credentials: "include",
+        headers,
+    });
 }

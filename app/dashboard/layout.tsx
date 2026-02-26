@@ -12,9 +12,9 @@ export default async function DashboardLayout({
 }) {
   const user = await getCurrentUser();
 
-  if (!user) {
-    redirect("/");
-  }
+  // if (!user) {
+  //   redirect("/");
+  // }
 
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-[#070A13]">
