@@ -4,7 +4,7 @@ import { jwtVerify } from "jose";
 export async function proxy(request: NextRequest) {
     const token = request.cookies.get("accessToken")?.value;
     const pathname = request.nextUrl.pathname;
-
+    console.log("token", token)
     // Redirect to home if no token and trying to access dashboard
     if (!token && pathname.startsWith("/dashboard")) {
         return NextResponse.redirect(new URL("/", request.url));

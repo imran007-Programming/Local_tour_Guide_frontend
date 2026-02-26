@@ -13,7 +13,7 @@ export async function setAuthCookies(
         secure: true,
         sameSite: "none",
         path: "/",
-        maxAge: 60 * 1000
+        maxAge: 15 * 60 * 1000
     });
 
 
