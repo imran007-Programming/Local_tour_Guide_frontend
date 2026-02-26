@@ -198,17 +198,15 @@ export default function BookingsList({
       const cancelUrl = `${window.location.origin}/dashboard/bookings/cancel`;
 
       // First create payment intent to initialize payment record
-      await fetch(`${BASE_URL}/payments/stripe/create-intent`, {
+      await authFetch(`${BASE_URL}/payments/stripe/create-intent`, {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bookingId }),
       });
 
       // Then create checkout session with return URL
-      const res = await fetch(`${BASE_URL}/payments/checkout`, {
+      const res = await authFetch(`${BASE_URL}/payments/checkout`, {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingId,

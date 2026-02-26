@@ -61,7 +61,7 @@ export default function SignInModal({
       setOpen(false);
     } catch (error) {
       console.error(error);
-      toast.error("Login failed");
+      // toast.error("Login failed");
     } finally {
       setIsLoading(false);
     }
