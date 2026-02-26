@@ -25,16 +25,18 @@ export default async function DashboardLayout({
       <BreadcrumbBanner />
 
       {/* Centered Dashboard Area */}
-      <div className="max-w-[1400px] mx-auto px-6 py-8">
-        <div className="flex gap-8">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
-          <Sidebar user={user} />
+          <div className="lg:block hidden">
+            <Sidebar user={user} />
+          </div>
 
           {/* Main Content */}
           <main
             className="flex-1 bg-white dark:bg-[#0B0F19]
                        border border-zinc-200 dark:border-zinc-800
-                       rounded-2xl p-6 shadow-sm"
+                       rounded-2xl p-4 sm:p-6 shadow-sm"
           >
             {children}
           </main>

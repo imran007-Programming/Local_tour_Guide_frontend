@@ -97,10 +97,10 @@ export default function GuidesPage() {
         your journey unforgettable.
       </p>
 
-      <div className="flex gap-8">
+      <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Sidebar - Filters */}
-        <div className="w-80 flex-shrink-0">
-          <div className="bg-white dark:bg-zinc-900 rounded-lg shadow p-6 sticky top-4">
+        <div className="w-full lg:w-80 flex-shrink-0">
+          <div className="bg-white dark:bg-zinc-900 rounded-lg shadow p-6 lg:sticky lg:top-4">
             <h2 className="text-xl font-bold mb-6">Filters</h2>
 
             <div className="mb-6">
@@ -183,7 +183,7 @@ export default function GuidesPage() {
 
         {/* Right Side - Guides */}
         <div className="flex-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {guides.map((guide) => (
           <div
             key={guide.id}

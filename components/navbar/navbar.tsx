@@ -58,21 +58,21 @@ export default function Navbar({ user }: { user?: User }) {
         }`}
       >
         <div className="text-white text-sm">
-          <div className="mx-auto max-w-7xl px-6 py-2 flex justify-between items-center">
-            <p>📞 Toll Free: +1 56565 56594</p>
-            <span>✉️ info@example.com</span>
+          <div className="mx-auto max-w-7xl px-6 py-2 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
+            <p className="text-xs sm:text-sm">📞 Toll Free: +1 56565 56594</p>
+            <span className="text-xs sm:text-sm">✉️ info@example.com</span>
           </div>
         </div>
       </div>
 
       {/* ================= MAIN NAVBAR ================= */}
       <div
-        className={`fixed top-0 left-0 w-full z-50
-          transition-colors duration-1000 ease-in-out
+        className={`fixed left-0 w-full z-50
+          transition-all duration-1000 ease-in-out
           ${
             scrolled
-              ? "dark:bg-black bg-white shadow-md py-4"
-              : "mt-7 bg-transparent py-4"
+              ? "top-0 dark:bg-black bg-white shadow-md py-4"
+              : "top-10 bg-transparent py-4"
           }`}
       >
         <div className="mx-auto max-w-7xl px-6 flex items-center justify-between">
