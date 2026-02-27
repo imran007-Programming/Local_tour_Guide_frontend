@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { authFetch } from "@/lib/authFetch";
 import { BASE_URL } from "@/lib/config";
@@ -15,6 +15,20 @@ export default function WishlistButton({
 }) {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const checkWishlist = async () => {
+      if (userRole === "TOURIST") {
+        const res = await authFetch(`${BASE_URL}/tourists/wishlist`);
+        if (res?.ok) {
+          const data = await res.json();
+          const inWishlist = data.data?.some((item: any) => item.tour.id === tourId);
+          setIsInWishlist(inWishlist);
+        }
+      }
+    };
+    checkWishlist();
+  }, [tourId, userRole]);
 
   const toggleWishlist = async () => {
     if (!userRole) {
@@ -64,11 +78,11 @@ export default function WishlistButton({
     <button
       onClick={toggleWishlist}
       disabled={loading}
-      className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+      className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition disabled:opacity-50"
       title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
     >
       <Heart
-        className={`w-6 h-6 ${
+        className={`w-6 h-6 transition-colors ${
           isInWishlist
             ? "fill-red-500 text-red-500"
             : "text-gray-400 hover:text-red-500"
