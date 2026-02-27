@@ -152,6 +152,7 @@ export default function TourReviews({
                     src={review?.tourist?.user?.profilePic || "/avatar.png"}
                     alt={review?.tourist?.user?.name}
                     fill
+                    sizes="48px"
                     className="object-cover"
                   />
                 </div>

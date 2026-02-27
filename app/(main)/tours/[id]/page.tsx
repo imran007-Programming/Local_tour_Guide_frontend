@@ -15,6 +15,22 @@ async function getTour(slug: string) {
   const data = await res.json();
   return data.data;
 }
+
+async function getWishlistStatus(tourId: string, userRole?: string) {
+  if (userRole !== "TOURIST") return false;
+  try {
+    const res = await authFetch(`${BASE_URL}/tourists/getallwishlist`, {
+      cache: "no-store",
+    });
+    if (!res?.ok) return false;
+    const data = await res.json();
+    const wishlistItems = data.data || [];
+    return wishlistItems.some((item: any) => item.tour?.id === tourId);
+  } catch {
+    return false;
+  }
+}
+
 async function getRating() {
   const res = await authFetch(`${BASE_URL}/guides`, {
     cache: "no-store",
@@ -31,6 +47,11 @@ export default async function TourPage({
 }) {
   const { id: slug } = await params;
   const tour = await getTour(slug);
+  
+  if (!tour) {
+    return <div className="max-w-6xl mx-auto p-6">Tour not found</div>;
+  }
+  
   const ratings = await getRating();
 
   const getGuideRating = ratings.filter(
@@ -38,9 +59,7 @@ export default async function TourPage({
   );
 
   const user = await getCurrentUser();
-  if (!tour) {
-    return <div className="max-w-6xl mx-auto p-6">Tour not found</div>;
-  }
+  const isInWishlist = await getWishlistStatus(tour.id, user?.data?.role);
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8 mt-10">
@@ -50,6 +69,7 @@ export default async function TourPage({
           src={tour.images[0] || "/placeholder.jpg"}
           alt={tour.title}
           fill
+          sizes="(max-width: 1536px) 100vw, 1536px"
           className="object-cover"
         />
       </div>
@@ -59,7 +79,7 @@ export default async function TourPage({
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-start justify-between">
             <h1 className="text-4xl font-bold">{tour.title}</h1>
-            <WishlistButton tourId={tour.id} userRole={user?.data?.role} />
+            <WishlistButton tourId={tour.id} userRole={user?.data?.role} initialInWishlist={isInWishlist} />
           </div>
 
           <div className="flex flex-wrap gap-4 text-gray-600 dark:text-gray-400">
@@ -115,6 +135,7 @@ export default async function TourPage({
                     src={tour.guide.user.profilePic || "/avatar.png"}
                     alt={tour.guide.user.name}
                     fill
+                    sizes="80px"
                     className="object-cover"
                   />
                 </div>
@@ -206,7 +227,7 @@ export default async function TourPage({
                     key={i}
                     className="relative h-48 rounded-lg overflow-hidden"
                   >
-                    <Image src={img} alt="" fill className="object-cover" />
+                    <Image src={img} alt="" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
                   </div>
                 ))}
               </div>

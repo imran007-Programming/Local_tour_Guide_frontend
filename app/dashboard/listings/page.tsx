@@ -39,7 +39,11 @@ export default async function ListingsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tours.map((tour: Tour) => {
-            const slug = tour.title.toLowerCase().replace(/\s+/g, "-");
+            // const slug = tour.title.toLowerCase().replace(/\s+/g, "-");
+            const slug = tour.title
+              .toLowerCase()
+              .replace(/\s+/g, "-")
+              .replace(/[^\w-]+/g, "");
             return (
               <Link
                 key={tour.id}
