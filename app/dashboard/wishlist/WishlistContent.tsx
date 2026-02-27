@@ -15,6 +15,7 @@ interface WishlistItem {
   id: string;
   tour: {
     id: string;
+    slug: string;
     title: string;
     description: string;
     price: number;
@@ -37,7 +38,7 @@ export default function WishlistContent({ user }: { user: User }) {
 
       if (res?.ok) {
         const result = await res.json();
-        console.log(result);
+
         setWishlist(result.data || []);
       }
       setLoading(false);
@@ -88,7 +89,7 @@ export default function WishlistContent({ user }: { user: User }) {
           key={item.id}
           className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden hover:shadow-lg transition"
         >
-          <Link href={`/tours/${item.tour.id}`}>
+          <Link href={`/tours/${item.tour.slug}`}>
             <div className="relative h-48">
               <Image
                 src={item.tour.images[0] || "/placeholder.jpg"}
@@ -100,7 +101,7 @@ export default function WishlistContent({ user }: { user: User }) {
           </Link>
 
           <div className="p-4 space-y-3">
-            <Link href={`/tours/${item.tour.id}`}>
+            <Link href={`/tours/${item.tour.slug}`}>
               <h3 className="font-bold text-lg hover:text-red-600 dark:text-white dark:hover:text-red-400 transition">
                 {item.tour.title}
               </h3>
