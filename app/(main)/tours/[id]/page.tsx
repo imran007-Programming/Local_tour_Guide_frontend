@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import BookingButton from "./BookingButton";
 import TourReviews from "./TourReviews";
 import WishlistButton from "./WishlistButton";
+import ContactGuideButton from "./ContactGuideButton";
 
 async function getTour(slug: string) {
   const res = await authFetch(`${BASE_URL}/tour/${slug}`, {
@@ -244,6 +245,12 @@ export default async function TourPage({
             <p className="text-gray-600 dark:text-gray-400">per person</p>
 
             <BookingButton tourId={tour.id} userRole={user?.data?.role} />
+            <ContactGuideButton
+              guideId={tour.guide.user.id}
+              guideName={tour.guide.user.name}
+              guideProfilePic={tour.guide.user.profilePic}
+              userRole={user?.data?.role}
+            />
 
             <div className="pt-4 border-t space-y-2 text-sm">
               <div className="flex justify-between">

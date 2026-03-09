@@ -1,11 +1,12 @@
 "use client";
 
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
-import { Bell, User, MapPin, Menu } from "lucide-react";
+import { User, MapPin, Menu } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import Sidebar from "./Sidebar";
 import { User as UserType } from "@/types/user";
+import NotificationBell from "@/components/navbar/NotificationBell";
 
 export default function Header({ user }: { user?: UserType }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,9 +28,7 @@ export default function Header({ user }: { user?: UserType }) {
         </div>
         <div className="flex items-center gap-4">
           <AnimatedThemeToggler />
-          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
-            <Bell size={20} />
-          </button>
+          <NotificationBell />
           <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
             <User size={20} />
           </button>

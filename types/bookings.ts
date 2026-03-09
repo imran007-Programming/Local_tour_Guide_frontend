@@ -30,5 +30,5 @@ export interface Booking {
         transactionId?: string;
         paidAt?: string;
         createdAt: string;
-    }[];
+    };
 }

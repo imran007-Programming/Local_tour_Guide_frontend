@@ -10,7 +10,10 @@ interface BookingButtonProps {
   tourId: string;
 }
 
-export default function BookingButton({ userRole, tourId }: BookingButtonProps) {
+export default function BookingButton({
+  userRole,
+  tourId,
+}: BookingButtonProps) {
   const [signInOpen, setSignInOpen] = useState(false);
   const [signUpOpen, setSignUpOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -32,7 +35,11 @@ export default function BookingButton({ userRole, tourId }: BookingButtonProps) 
         Book Now
       </button>
 
-      <BookingModal open={bookingOpen} setOpen={setBookingOpen} tourId={tourId} />
+      <BookingModal
+        open={bookingOpen}
+        setOpen={setBookingOpen}
+        tourId={tourId}
+      />
 
       <SignInModal
         setRegisterOpen={setSignUpOpen}

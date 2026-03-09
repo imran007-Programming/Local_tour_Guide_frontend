@@ -1,9 +1,11 @@
+import { getNewAccessToken } from "@/app/actions/newAccessToken";
+import { BASE_URL } from "./config";
+
 export async function authFetch(
     url: string,
     options: RequestInit = {}
 ) {
     const isServer = typeof window === "undefined";
-
     const headers: Record<string, string> = {
         ...(options.headers as Record<string, string>),
     };
@@ -11,12 +13,21 @@ export async function authFetch(
     if (isServer) {
         const { cookies } = await import("next/headers");
         const cookieStore = await cookies();
-        const accessToken = cookieStore.get("accessToken")?.value;
+        let accessToken = cookieStore.get("accessToken")?.value;
+
+        // Refresh token if needed before making request
+        if (url !== `${BASE_URL}/auth/refreshToken`) {
+            const tokenResult = await getNewAccessToken();
+            if (tokenResult.tokenRefreshed && tokenResult.accessToken) {
+                accessToken = tokenResult.accessToken;
+            }
+        }
 
         if (accessToken) {
             headers.Authorization = `Bearer ${accessToken}`;
         }
 
+        // Forward all cookies to backend
         const cookieHeader = cookieStore
             .getAll()
             .map((cookie) => `${cookie.name}=${cookie.value}`)
@@ -24,16 +35,6 @@ export async function authFetch(
 
         if (cookieHeader) {
             headers.cookie = cookieHeader;
-        }
-    } else {
-        // Client-side: get token from cookie
-        const accessToken = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('accessToken='))
-            ?.split('=')[1];
-
-        if (accessToken) {
-            headers.Authorization = `Bearer ${accessToken}`;
         }
     }
 

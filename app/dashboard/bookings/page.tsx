@@ -1,4 +1,4 @@
-import BookingsList from "./BookingsList";
+import BookingsTable from "./BookingsTable";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function BookingsPage() {
@@ -9,7 +9,7 @@ export default async function BookingsPage() {
       <h2 className="text-2xl font-bold mb-6">
         {user.data.role === "GUIDE" ? "Assigned Bookings" : "My Bookings"}
       </h2>
-      <BookingsList user={user} />
+      <BookingsTable user={user} />
     </div>
   );
 }

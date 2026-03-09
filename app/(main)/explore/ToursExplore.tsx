@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Search } from "lucide-react";
-import BookingPagination from "@/app/dashboard/bookings/BookingPagination";
+import BookingPagination from "@/app/dashboard/bookings/BookingsPagination";
 import TourCard from "./TourCard";
 import BreadcrumbBanner from "@/app/dashboard/components/BreadcrumbBanner";
 import Spinner from "@/components/ui/spinner";

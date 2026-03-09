@@ -1,9 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { getNewAccessToken } from "./app/actions/newAccessToken";
 
 export async function proxy(request: NextRequest) {
-    const token = request.cookies.get("accessToken")?.value;
     const pathname = request.nextUrl.pathname;
+    const hasAccessTokenSearchParams = request.nextUrl.searchParams.has('tokenRefreshed')
+
+    if (hasAccessTokenSearchParams) {
+        const url = request.nextUrl.clone();
+        url.searchParams.delete('tokenRefreshed');
+        return NextResponse.redirect(url)
+    }
+
+    const tokenRefreshResult = await getNewAccessToken();
+
+    if (tokenRefreshResult.tokenRefreshed && tokenRefreshResult.accessToken) {
+        const response = NextResponse.next();
+        response.cookies.set("accessToken", tokenRefreshResult.accessToken, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 10
+        });
+        return response;
+    }
+
+    const token = tokenRefreshResult.accessToken;
 
     // Redirect to home if no token and trying to access dashboard
     if (!token && pathname.startsWith("/dashboard")) {

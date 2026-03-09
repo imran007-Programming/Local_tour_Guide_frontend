@@ -10,6 +10,8 @@ import RegisterModal from "../Auth/Register";
 import { User } from "@/types/user";
 import { logoutAction } from "@/app/actions/logoutAction";
 import { BASE_URL } from "@/lib/config";
+import NotificationBell from "./NotificationBell";
+import PwaInstall from "../PwaInstall";
 
 export default function Navbar({ user }: { user?: User }) {
   const [scrolled, setScrolled] = useState(false);
@@ -158,6 +160,8 @@ export default function Navbar({ user }: { user?: User }) {
 
           {/* RIGHT ACTIONS */}
           <div className="flex items-center gap-3">
+            {user?.data && <NotificationBell />}
+            <PwaInstall />
             <AnimatedThemeToggler />
 
             {/* Desktop Buttons */}

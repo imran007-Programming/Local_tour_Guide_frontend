@@ -30,9 +30,15 @@ export const metadata: Metadata = {
   authors: [{ name: "TourGuide" }],
   creator: "TourGuide",
   publisher: "TourGuide",
+  manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "TourGuide",
   },
   openGraph: {
     type: "website",
@@ -58,6 +64,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <meta name="theme-color" content="#000000" />
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js');
+              });
+            }
+          `
+        }} />
       </head>
       <body
         className={`${poppins.variable} antialiased`}

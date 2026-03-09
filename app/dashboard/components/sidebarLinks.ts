@@ -7,13 +7,15 @@ import {
     Heart,
     Star,
     UserPen,
-
     Bell,
     Wallet,
+    MessageCircle,
 } from "lucide-react";
 
 export const getSectionsByRole = (role: string) => {
     const commonAccount = [
+        { href: "/dashboard/chat", icon: MessageCircle, label: "Messages" },
+        { href: "/dashboard/notifications", icon: Bell, label: "Notifications" },
         { href: "/dashboard/profile", icon: UserPen, label: "My Profile" },
         { href: "/dashboard/settings", icon: Users, label: "Settings" },
     ];
@@ -24,7 +26,7 @@ export const getSectionsByRole = (role: string) => {
                 title: "Main",
                 items: [
                     { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-                    { href: "/dashboard/requests", icon: Bell, label: "Pending Requests" },
+                    { href: "/dashboard/requests", icon: Calendar, label: "Pending Requests" },
                     { href: "/dashboard/bookings", icon: Calendar, label: "Upcoming Bookings" },
                     { href: "/dashboard/listings", icon: Map, label: "My Listings" },
                     { href: "/dashboard/reviews", icon: Star, label: "Reviews" },

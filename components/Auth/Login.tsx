@@ -59,7 +59,7 @@ export default function SignInModal({
 
       toast.success("Login successful!");
       setOpen(false);
-      await setAuthCookies(result.data.accessToken);
+      await setAuthCookies(result.data.accessToken, result.data.refreshToken);
     } catch (error) {
       console.error(error);
       // toast.error("Login failed");

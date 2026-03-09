@@ -50,7 +50,7 @@ export default function EarningsList({ user }: { user: User }) {
   }
 
   const completedBookings = bookings.filter(
-    (b) => b.status === "COMPLETED" && b.payment && b.payment.length > 0
+    (b) => b.status === "COMPLETED" && b.payment
   );
 
   const pendingBookings = bookings.filter(
@@ -58,8 +58,7 @@ export default function EarningsList({ user }: { user: User }) {
   );
 
   const totalEarnings = completedBookings.reduce((sum, b) => {
-    const payment = b.payment?.[0];
-    return sum + (payment?.amount || 0);
+    return sum + (b.payment?.amount || 0);
   }, 0);
 
   const pendingEarnings = pendingBookings.reduce(
@@ -156,7 +155,7 @@ export default function EarningsList({ user }: { user: User }) {
                 </tr>
               ) : (
                 completedBookings.map((booking) => {
-                  const payment = booking.payment?.[0];
+                  const payment = booking.payment;
                   return (
                     <tr key={booking.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 text-sm dark:text-gray-300">

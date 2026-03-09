@@ -29,10 +29,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { XCircle, CheckCheck, Search } from "lucide-react";
-import BookingPagination from "./BookingPagination";
+import BookingsPagination from "./BookingsPagination";
 import { Input } from "@/components/ui/input";
 
-export default function BookingsList({
+export default function BookingsTable({
   user,
   initialStatus,
 }: {
@@ -41,6 +41,7 @@ export default function BookingsList({
 }) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [paginationLoading, setPaginationLoading] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string>("");
   const [cancelReason, setCancelReason] = useState("");
@@ -128,6 +129,8 @@ export default function BookingsList({
 
   useEffect(() => {
     const fetchBookings = async () => {
+      setPaginationLoading(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       let endpoint = "";
       if (isGuide) {
         endpoint = "/bookings/assigned";
@@ -158,6 +161,7 @@ export default function BookingsList({
         setTotalPages(Math.ceil(meta.total / meta.limit));
       }
       setLoading(false);
+      setPaginationLoading(false);
     };
 
     const debounce = setTimeout(fetchBookings, 300);
@@ -177,7 +181,7 @@ export default function BookingsList({
     setPaymentLoading(bookingId);
     try {
       const successUrl = `${window.location.origin}/dashboard/bookings?payment=success&session_id={CHECKOUT_SESSION_ID}`;
-      const cancelUrl = `${window.location.origin}/dashboard/bookings/cancel`;
+      const cancelUrl = `${window.location.origin}/dashboard/bookings/payment-cancel`;
 
       // First create payment intent to initialize payment record
       await authFetch(`${BASE_URL}/payments/stripe/create-intent`, {
@@ -304,7 +308,13 @@ export default function BookingsList({
           </div>
         ) : (
           <>
-            {bookings.map((booking) => (
+            {paginationLoading ? (
+              <div className="flex justify-center items-center py-20">
+                <Spinner size="lg" className="border-red-500" />
+              </div>
+            ) : (
+              <>
+                {bookings.map((booking) => (
               <div
                 key={booking.id}
                 className="bg-white dark:bg-zinc-900 p-4 sm:p-6 rounded-lg shadow"
@@ -379,7 +389,7 @@ export default function BookingsList({
                       ${booking.tour.price}
                     </p>
                     {/* Tourist */}
-                    {isTourist && booking?.payment?.[0]?.status !== "PAID" && (
+                    {isTourist && booking?.payment?.status !== "PAID" && (
                       <button
                         onClick={() => handlePayment(booking.id)}
                         disabled={
@@ -401,7 +411,7 @@ export default function BookingsList({
                     {isAdmin && (
                       <span
                         className={`font-semibold ${
-                          booking?.payment?.[0]?.status === "COMPLETED"
+                          booking?.payment?.status === "COMPLETED"
                             ? "text-green-600"
                             : "text-yellow-600"
                         }`}
@@ -411,7 +421,7 @@ export default function BookingsList({
                     )}
                     {isTourist &&
                       booking.status !== "CANCELLED" &&
-                      booking?.payment?.[0]?.status !== "PAID" && (
+                      booking?.payment?.status !== "PAID" && (
                         <button
                           onClick={() => {
                             setSelectedBookingId(booking.id);
@@ -429,36 +439,38 @@ export default function BookingsList({
                     Payment Status:{" "}
                     <span
                       className={`font-semibold ${
-                        booking?.payment?.[0]?.status === "PAID"
+                        booking?.payment?.status === "PAID"
                           ? "text-green-600"
-                          : booking?.payment?.[0]?.status === "PENDING"
+                          : booking?.payment?.status === "PENDING"
                             ? "text-yellow-600"
-                            : "text-red-600"
+                            : booking?.payment?.status === "FAILED"
+                              ? "text-red-600"
+                              : "text-gray-600"
                       }`}
                     >
-                      {booking?.payment?.[0]?.status || "PENDING"}
+                      {booking?.payment?.status || "NOT_PAID"}
                     </span>
                   </div>
                   <div className="flex flex-col gap-2 items-end">
-                    {booking?.payment?.[0]?.transactionId && (
+                    {booking?.payment?.transactionId && (
                       <div className="text-sm">
                         <span className="text-gray-600 dark:text-gray-400">
                           Transaction ID:{" "}
                         </span>
                         <span className="font-semibold text-blue-600 dark:text-blue-400">
-                          {booking.payment[0].transactionId}
+                          {booking.payment.transactionId}
                         </span>
                       </div>
                     )}
-                    {booking?.payment?.[0]?.status === "PAID" &&
-                      booking?.payment?.[0]?.paidAt && (
+                    {booking?.payment?.status === "PAID" &&
+                      booking?.payment?.paidAt && (
                         <div className="text-sm">
                           <span className="text-gray-600 dark:text-gray-400">
                             Paid At:{" "}
                           </span>
                           <span className="font-semibold text-purple-600 dark:text-purple-400">
                             {format(
-                              new Date(booking.payment[0].paidAt),
+                              new Date(booking.payment.paidAt),
                               "PPP p",
                             )}
                           </span>
@@ -492,12 +504,14 @@ export default function BookingsList({
               </div>
             ))}
 
-            {totalPages > 1 && (
-              <BookingPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+                {totalPages > 1 && (
+                  <BookingsPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                )}
+              </>
             )}
           </>
         )}

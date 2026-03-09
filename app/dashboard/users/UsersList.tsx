@@ -21,7 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search } from "lucide-react";
-import BookingPagination from "../bookings/BookingPagination";
+import BookingsPagination from "../bookings/BookingsPagination";
 import { format } from "date-fns";
 import Image from "next/image";
 
@@ -203,7 +203,7 @@ export default function UsersList() {
       </div>
 
       {totalPages > 1 && (
-        <BookingPagination
+        <BookingsPagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
