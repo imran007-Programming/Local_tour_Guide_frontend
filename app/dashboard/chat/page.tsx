@@ -45,7 +45,7 @@ export default function ChatPage() {
     fetchConversations();
 
     // Initialize Socket.IO
-    socket = io("http://localhost:5000", {
+    socket = io(BASE_URL.replace('/api', ''), {
       withCredentials: true,
     });
 

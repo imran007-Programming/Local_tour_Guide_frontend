@@ -40,7 +40,7 @@ export default function ChatModal({
   useEffect(() => {
     initChat();
 
-    socket = io("http://localhost:5000", {
+    socket = io(BASE_URL.replace('/api', ''), {
       withCredentials: true,
     });
 
