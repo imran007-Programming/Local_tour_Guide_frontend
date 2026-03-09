@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormValues, loginSchema } from "./ValidationSchema";
 import { Spinner } from "../ui/spinner";
 import { BASE_URL } from "@/lib/config";
+import { useRouter } from "next/navigation";
 
 interface SignInModalProps {
   open: boolean;
@@ -31,6 +32,7 @@ export default function SignInModal({
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
@@ -57,10 +59,8 @@ export default function SignInModal({
 
       toast.success("Login successful!");
       setOpen(false);
-      
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 100);
+      router.push("/dashboard");
+      router.refresh();
     } catch (error) {
       console.error(error);
       // toast.error("Login failed");
