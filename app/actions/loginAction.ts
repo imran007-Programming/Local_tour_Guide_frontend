@@ -14,7 +14,7 @@ export async function setAuthCookies(
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-        maxAge: 10
+        maxAge: 15 * 60
     });
 
     cookieStore.set("refreshToken", refreshToken, {
