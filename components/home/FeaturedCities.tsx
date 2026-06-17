@@ -134,7 +134,7 @@ export default function FeaturedCities() {
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
-    <section className="bg-zinc-950 dark:bg-zinc-950 py-24">
+    <section className="bg-gray-50 dark:bg-zinc-950 py-24">
       <div className="mx-auto max-w-7xl px-6">
 
         <motion.div

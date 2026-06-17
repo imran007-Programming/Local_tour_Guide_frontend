@@ -105,7 +105,7 @@ export default function Reviews() {
   const displayed = reviews.slice(0, 6);
 
   return (
-    <section className="bg-zinc-950 dark:bg-zinc-950 py-24">
+    <section className="bg-gray-50 dark:bg-zinc-950 py-24">
       <div className="max-w-7xl mx-auto px-6">
 
         {/* Header */}

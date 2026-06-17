@@ -168,38 +168,31 @@ export default function FeaturedTours() {
   }, []);
 
   return (
-    <section className="py-20 bg-zinc-950 dark:bg-zinc-950">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="py-16 md:py-20 bg-gray-50 dark:bg-zinc-950">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="grid grid-cols-3 items-start mb-10"
+          className="relative flex flex-col items-center mb-10 text-center"
         >
-          <div />
-
-          <div className="text-center">
-            <span className="text-red-500 text-sm font-semibold tracking-widest uppercase">
-              — Featured Tours
-            </span>
-            <h2 className="mt-2 text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
-              Top Picks <span className="text-red-500">For You</span>
-            </h2>
-            <p className="mt-3 pb-4 text-gray-500 dark:text-gray-400 max-w-lg text-sm">
-              Hand-selected tours loved by travellers — book yours today.
-            </p>
-          </div>
-
-          <div className="flex justify-end">
-            <Link
-              href="/explore"
-              className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-600 transition group shrink-0"
-            >
-              View all tours
-              <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
+          <span className="text-red-500 text-sm font-semibold tracking-widest uppercase">
+            — Featured Tours
+          </span>
+          <h2 className="mt-2 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight whitespace-nowrap">
+            Top Picks <span className="text-red-500">For You</span>
+          </h2>
+          <p className="mt-3 pb-2 text-gray-500 dark:text-gray-400 max-w-lg text-sm">
+            Hand-selected tours loved by travellers — book yours today.
+          </p>
+          <Link
+            href="/explore"
+            className="mt-3 md:mt-0 md:absolute md:right-0 md:top-0 flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-600 transition group shrink-0"
+          >
+            View all tours
+            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </motion.div>
 
         {loading ? (

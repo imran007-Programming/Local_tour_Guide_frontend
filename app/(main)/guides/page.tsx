@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BASE_URL } from "@/lib/config";
+import { CLIENT_BASE_URL } from "@/lib/config";
 import Image from "next/image";
 import Link from "next/link";
 import Spinner from "@/components/ui/spinner";
@@ -61,7 +61,7 @@ export default function GuidesPage() {
           params.append("sortOrder", "asc");
         }
 
-        const res = await fetch(`${BASE_URL}/guides?${params}`);
+        const res = await fetch(`${CLIENT_BASE_URL}/guides?${params}`);
         if (res?.ok) {
           const result = await res.json();
 

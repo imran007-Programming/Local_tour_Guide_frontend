@@ -9,7 +9,7 @@ import {
   Calendar, MessageSquare, BadgeCheck,
   DollarSign,
 } from "lucide-react";
-import { BASE_URL } from "@/lib/config";
+import { CLIENT_BASE_URL } from "@/lib/config";
 
 interface Guide {
   id: string;
@@ -37,7 +37,7 @@ export default function GuideProfilePage() {
   const [imgSrc, setImgSrc] = useState("/hero/Hero1.jpg");
 
   useEffect(() => {
-    fetch(`${BASE_URL}/guides`)
+    fetch(`${CLIENT_BASE_URL}/guides`)
       .then((r) => r.json())
       .then((data) => {
         const list: Guide[] = data.data || [];

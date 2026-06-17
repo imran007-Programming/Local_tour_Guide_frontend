@@ -9,7 +9,7 @@ import {
 
 export default function Faq() {
   return (
-    <section className="py-24 bg-zinc-950 dark:bg-zinc-950 transition-colors duration-300">
+    <section className="py-24 bg-gray-50 dark:bg-zinc-950 transition-colors duration-300">
       <div className="mx-auto max-w-4xl px-6">
         {/* Heading */}
         <div className="text-center mb-16">

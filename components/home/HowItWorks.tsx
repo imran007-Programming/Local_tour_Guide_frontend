@@ -36,7 +36,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-24 bg-zinc-950 dark:bg-zinc-950 relative overflow-hidden">
+    <section className="py-24 bg-gray-50 dark:bg-zinc-950 relative overflow-hidden">
       {/* Decorative blobs */}
       <div className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-10 blur-3xl pointer-events-none"
         style={{ background: "#7c3aed", transform: "translate(-40%, -40%)" }} />

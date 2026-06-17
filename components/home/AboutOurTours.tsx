@@ -34,8 +34,8 @@ const features = [
 
 export default function AboutSection() {
   return (
-    <section className="py-24 bg-zinc-950 dark:bg-zinc-950 overflow-hidden">
-      <div className="mx-auto max-w-7xl px-6">
+    <section className="py-16 md:py-24 bg-gray-50 dark:bg-zinc-950 overflow-hidden">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
 
         {/* Top: image + content */}
         <div className="grid lg:grid-cols-2 gap-10 items-center mb-10">
@@ -152,7 +152,7 @@ export default function AboutSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10"
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-10"
         >
           {stats.map((s, i) => (
             <motion.div
@@ -161,19 +161,19 @@ export default function AboutSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.1 }}
-              className="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex items-center gap-4"
+              className="bg-white dark:bg-zinc-800 rounded-2xl p-3 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 text-center sm:text-left"
             >
               {/* Icon */}
               <div
-                className="shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center"
+                className="shrink-0 w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center"
                 style={{ background: `${s.color}15` }}
               >
-                <s.icon className="w-6 h-6" style={{ color: s.color }} />
+                <s.icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: s.color }} />
               </div>
 
               {/* Text */}
               <div>
-                <p className="text-2xl font-extrabold text-gray-900 dark:text-white leading-none">
+                <p className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white leading-none">
                   <NumberTicker value={s.value} />+
                 </p>
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-medium leading-snug">

@@ -35,13 +35,13 @@ const names = [
 
 function LogoCard({ src, alt }: { src: any; alt: string }) {
   return (
-    <div className="shrink-0 flex items-center justify-center px-6 py-3 mx-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+    <div className="shrink-0 flex items-center justify-center px-6 py-3 mx-3 rounded-xl bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-300">
       <Image
         src={src}
         alt={alt}
         width={120}
         height={48}
-        className="object-contain w-28 h-12 brightness-0 invert opacity-60 hover:opacity-100 transition-opacity duration-300"
+        className="object-contain w-28 h-12 opacity-60 hover:opacity-100 transition-opacity duration-300 dark:brightness-0 dark:invert"
         quality={75}
       />
     </div>
@@ -67,7 +67,7 @@ function MarqueeRow({ images, names, reverse }: { images: any[]; names: string[]
 
 export default function ClientsMarquee() {
   return (
-    <section className="relative bg-zinc-950 dark:bg-zinc-950 py-14 overflow-hidden">
+    <section className="relative bg-gray-50 dark:bg-zinc-950 py-14 overflow-hidden">
 
       {/* background glow accents */}
       <div className="pointer-events-none absolute -top-20 left-1/4 w-96 h-96 rounded-full bg-red-600/10 blur-3xl" />
@@ -84,14 +84,14 @@ export default function ClientsMarquee() {
         <p className="text-xs font-bold tracking-[0.3em] uppercase text-zinc-500 mb-2">
           Our Partners
         </p>
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           Trusted by <span className="text-red-500">40+</span> clients around the globe
         </h2>
       </motion.div>
 
       {/* side gradient masks */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-32 z-10 bg-linear-to-r from-zinc-900 dark:from-zinc-950 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-32 z-10 bg-linear-to-l from-zinc-900 dark:from-zinc-950 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-32 z-10 bg-gradient-to-r from-gray-50 dark:from-zinc-950 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-32 z-10 bg-gradient-to-l from-gray-50 dark:from-zinc-950 to-transparent" />
 
       <div className="space-y-4">
         <MarqueeRow images={row1} names={names.slice(0, 6)} />

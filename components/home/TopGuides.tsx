@@ -164,7 +164,7 @@ export default function TopGuides() {
   }, []);
 
   return (
-    <section className="py-24 bg-zinc-950 dark:bg-zinc-950">
+    <section className="py-24 bg-gray-50 dark:bg-zinc-950">
       <div className="mx-auto max-w-7xl px-6">
 
         {/* Header */}
