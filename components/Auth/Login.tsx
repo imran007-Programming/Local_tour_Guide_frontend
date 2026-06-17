@@ -67,11 +67,16 @@ export default function SignInModal({
       toast.success("Login successful!");
       setOpen(false);
       setIsRedirecting(true);
+      
+      // Safety: auto-dismiss overlay after 8 seconds if navigation fails
+      setTimeout(() => setIsRedirecting(false), 8000);
+      
       router.push("/dashboard");
       router.refresh();
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Login failed");
+      setIsRedirecting(false);
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +92,7 @@ export default function SignInModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/80 dark:bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md"
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
