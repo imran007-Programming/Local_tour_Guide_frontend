@@ -12,6 +12,7 @@ import { Spinner } from "../ui/spinner";
 import { BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
 import { loginAction } from "@/app/actions/loginAction";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface SignInModalProps {
   open: boolean;
@@ -33,6 +34,7 @@ export default function SignInModal({
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
   
   const onSubmit = async (data: LoginFormValues) => {
@@ -64,6 +66,7 @@ export default function SignInModal({
 
       toast.success("Login successful!");
       setOpen(false);
+      setIsRedirecting(true);
       router.push("/dashboard");
       router.refresh();
     } catch (error) {
@@ -75,7 +78,50 @@ export default function SignInModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
+      {/* Full-screen redirect spinner overlay */}
+      <AnimatePresence>
+        {isRedirecting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/80 dark:bg-black/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+              className="flex flex-col items-center gap-4"
+            >
+              {/* Animated spinner ring */}
+              <div className="relative">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+                  className="w-14 h-14 rounded-full border-4 border-red-200 dark:border-red-900 border-t-red-500 dark:border-t-red-400"
+                />
+                <motion.div
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-1 w-10 h-10 rounded-full border-4 border-transparent border-b-red-400 dark:border-b-red-300"
+                />
+              </div>
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              >
+                Taking you to your dashboard...
+              </motion.p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         className="
         sm:max-w-md
@@ -179,10 +225,10 @@ export default function SignInModal({
           {/* Submit */}
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isLoading || isSubmitting}
             className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >
-            {isSubmitting ? (
+            {isLoading ? (
               <>
                 <Spinner size="sm" className="border-white" />
                 Logging in...
@@ -213,28 +259,31 @@ export default function SignInModal({
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
+              disabled={isLoading}
               onClick={() =>
-                onSubmit({ email: "admin@gmail.com", password: "123456" })
+                onSubmit({ email: "admin@gmail.com", password: "52535455" })
               }
-              className="px-3 py-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer"
+              className="px-3 py-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer disabled:opacity-50"
             >
               Admin
             </button>
             <button
               type="button"
+              disabled={isLoading}
               onClick={() =>
                 onSubmit({ email: "guide@gmail.com", password: "123456" })
               }
-              className="px-3 py-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer"
+              className="px-3 py-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer disabled:opacity-50"
             >
               Guide
             </button>
             <button
               type="button"
+              disabled={isLoading}
               onClick={() =>
                 onSubmit({ email: "tourist@gmail.com", password: "123456" })
               }
-              className="px-3 py-2 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 transition cursor-pointer"
+              className="px-3 py-2 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 transition cursor-pointer disabled:opacity-50"
             >
               Tourist
             </button>
@@ -242,5 +291,6 @@ export default function SignInModal({
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

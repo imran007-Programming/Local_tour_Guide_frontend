@@ -2,7 +2,6 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { toast } from "sonner";
 import BreadcrumbBanner from "./components/BreadcrumbBanner";
 
 export default async function DashboardLayout({
@@ -17,28 +16,24 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-100 dark:bg-[#070A13]">
-      {/* Full Width Header */}
-      <Header user={user} />
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#070A13]">
+      <div className="flex">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block sticky top-0 h-screen">
+          <Sidebar user={user} />
+        </div>
 
-      {/* Full Width Breadcrumb */}
-      <BreadcrumbBanner />
+        {/* Main area */}
+        <div className="flex-1 flex flex-col min-h-screen">
+          {/* Header */}
+          <Header user={user} />
 
-      {/* Centered Dashboard Area */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <div className="lg:block hidden">
-            <Sidebar user={user} />
-          </div>
+          {/* Breadcrumb */}
+          <BreadcrumbBanner />
 
-          {/* Main Content */}
-          <main
-            className="flex-1 bg-white dark:bg-[#0B0F19]
-                       border border-zinc-200 dark:border-zinc-800
-                       rounded-2xl p-4 sm:p-6 shadow-sm"
-          >
-            {children}
+          {/* Content */}
+          <main className="flex-1 p-4 sm:p-6 lg:p-8">
+            <div className="max-w-[1200px] mx-auto">{children}</div>
           </main>
         </div>
       </div>

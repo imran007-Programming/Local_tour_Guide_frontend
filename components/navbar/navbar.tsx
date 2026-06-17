@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
-import { Menu, X, MapPin, ArrowRight } from "lucide-react";
+import { MapPin, ArrowRight } from "lucide-react";
 import SignInModal from "../Auth/Login";
 import RegisterModal from "../Auth/Register";
 import { User } from "@/types/user";
@@ -11,7 +11,7 @@ import { logoutAction } from "@/app/actions/logoutAction";
 import { BASE_URL } from "@/lib/config";
 import NotificationBell from "./NotificationBell";
 import PwaInstall from "../PwaInstall";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar({ user }: { user?: User }) {
   const [scrolled, setScrolled] = useState(false);
@@ -28,6 +28,18 @@ export default function Navbar({ user }: { user?: User }) {
     });
     await logoutAction();
   };
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,7 +68,7 @@ export default function Navbar({ user }: { user?: User }) {
     <header className="absolute top-0 left-0 w-full z-50">
       {/* ================= TOP BAR ================= */}
       <div
-        className={`transition-all duration-500 overflow-hidden border-b border-white/10 ${
+        className={`transition-all duration-[800ms] ease-in-out overflow-hidden border-b border-white/10 ${
           scrolled ? "max-h-0 opacity-0" : "max-h-auto opacity-100"
         }`}
       >
@@ -74,7 +86,7 @@ export default function Navbar({ user }: { user?: User }) {
 
       {/* ================= MAIN NAVBAR ================= */}
       <div
-        className={`fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-700 ease-in-out ${
+        className={`fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-[900ms] ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
           scrolled
             ? "top-4 w-[92%] max-w-5xl bg-white dark:bg-zinc-900 shadow-xl shadow-black/10 dark:shadow-black/30 rounded-full py-3 px-6 border border-gray-200 dark:border-zinc-700"
             : "top-10 sm:top-12 w-full max-w-7xl bg-transparent py-4 px-4 sm:px-6 rounded-none border border-transparent"
@@ -211,173 +223,153 @@ export default function Navbar({ user }: { user?: User }) {
               )}
             </div>
 
-            {/* MOBILE HAMBURGER */}
+            {/* MOBILE HAMBURGER - Animated */}
             <button
-              className={`md:hidden ${
+              className={`md:hidden relative w-8 h-8 flex items-center justify-center ${
                 scrolled ? "text-black dark:text-white" : "text-white"
               }`}
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
             >
-              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+              <div className="relative w-6 h-5 flex flex-col justify-between">
+                <span
+                  className={`block h-[2px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.68,-0.6,0.32,1.6)] origin-center ${
+                    scrolled ? "bg-black dark:bg-white" : "bg-white"
+                  } ${mobileOpen ? "rotate-45 translate-y-[9px]" : "rotate-0 translate-y-0"}`}
+                />
+                <span
+                  className={`block h-[2px] rounded-full transition-all duration-300 ease-in-out ${
+                    scrolled ? "bg-black dark:bg-white" : "bg-white"
+                  } ${mobileOpen ? "opacity-0 scale-x-0" : "opacity-100 scale-x-100"}`}
+                />
+                <span
+                  className={`block h-[2px] rounded-full transition-all duration-500 ease-[cubic-bezier(0.68,-0.6,0.32,1.6)] origin-center ${
+                    scrolled ? "bg-black dark:bg-white" : "bg-white"
+                  } ${mobileOpen ? "-rotate-45 -translate-y-[9px]" : "rotate-0 translate-y-0"}`}
+                />
+              </div>
             </button>
           </div>
         </div>
       </div>
 
-      {/* ================= FULL SCREEN MOBILE DRAWER ================= */}
-      <>
-        {/* Overlay */}
-        <div
-          className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
-            mobileOpen ? "opacity-100 visible" : "opacity-0 invisible"
-          }`}
-          onClick={() => setMobileOpen(false)}
-        />
+      {/* ================= FULL SCREEN MOBILE MENU (Top to Bottom) ================= */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ clipPath: "inset(0 0 100% 0)" }}
+            animate={{ clipPath: "inset(0 0 0% 0)" }}
+            exit={{ clipPath: "inset(0 0 100% 0)" }}
+            transition={{ duration: 0.6, ease: [0.76, 0, 0.24, 1] }}
+            className="fixed inset-0 bg-black z-40 md:hidden"
+          >
+            <div className="flex flex-col h-full pt-24 px-8 pb-8">
+              {/* NAVIGATION LINKS - Staggered */}
+              <nav className="flex-1 flex flex-col justify-center space-y-1">
+                {[
+                  { href: "/", label: "Home" },
+                  { href: "/explore", label: "Explore Tours" },
+                  { href: "/guides", label: "Guides" },
+                  ...(user?.data?.role === "TOURIST"
+                    ? [
+                        { href: "/dashboard/bookings", label: "My Bookings" },
+                        { href: "/dashboard/wishlist", label: "Wishlist" },
+                        { href: "/dashboard", label: "Profile" },
+                      ]
+                    : []),
+                  ...(user?.data?.role === "GUIDE"
+                    ? [
+                        { href: "/dashboard", label: "Dashboard" },
+                        { href: "/dashboard/listings", label: "My Listings" },
+                        { href: "/dashboard/profile", label: "Profile" },
+                      ]
+                    : []),
+                  ...(user?.data?.role === "ADMIN"
+                    ? [
+                        { href: "/dashboard", label: "Admin Dashboard" },
+                        { href: "/dashboard/users", label: "Manage Users" },
+                        { href: "/dashboard/listings", label: "Manage Listings" },
+                      ]
+                    : []),
+                ].map((item, index) => (
+                  <motion.div
+                    key={item.href + item.label}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{
+                      duration: 0.4,
+                      delay: 0.1 + index * 0.08,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                    }}
+                  >
+                    <Link
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="block py-3 border-b border-white/10 group"
+                    >
+                      <span className="text-white text-xl font-medium inline-block transition-all duration-300 group-hover:translate-x-3 group-hover:text-red-400">
+                        {item.label}
+                      </span>
+                    </Link>
+                  </motion.div>
+                ))}
+              </nav>
 
-        {/* Drawer */}
-        <div
-          className={`fixed top-0 right-0 h-full w-[85%] max-w-sm bg-black text-white z-50
-            transform transition-transform duration-300 ease-in-out
-            ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
-        >
-          <div className="flex flex-col h-full">
-            {/* HEADER */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <MapPin className="text-red-500" size={20} />
-                TourGuide
-              </h2>
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-red-600"
+              {/* FOOTER BUTTONS - Staggered */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className="space-y-3 pt-6"
               >
-                ✕
-              </button>
-            </div>
-
-            {/* CONTENT */}
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-              <Link href="/" onClick={() => setMobileOpen(false)}>
-                <div className="flex justify-between items-center py-3 border-b border-white/10">
-                  <span className="text-base text-white">Home</span>
-                </div>
-              </Link>
-              <Link href="/explore" onClick={() => setMobileOpen(false)}>
-                <div className="flex justify-between items-center py-3 border-b border-white/10">
-                  <span className="text-base text-white">Explore Tours</span>
-                </div>
-              </Link>
-              <Link href="/guides" onClick={() => setMobileOpen(false)}>
-                <div className="flex justify-between items-center py-3 border-b border-white/10">
-                  <span className="text-base text-white">Guides</span>
-                </div>
-              </Link>
-
-              {user?.data?.role === "TOURIST" && (
-                <>
-                  <Link href="/dashboard/bookings" onClick={() => setMobileOpen(false)}>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-base text-white">My Bookings</span>
-                    </div>
-                  </Link>
-                  <Link href="/dashboard/wishlist" onClick={() => setMobileOpen(false)}>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-base text-white">Wishlist</span>
-                    </div>
-                  </Link>
-                  <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-base text-white">Profile</span>
-                    </div>
-                  </Link>
-                </>
-              )}
-
-              {user?.data?.role === "GUIDE" && (
-                <>
-                  <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-base text-white">Dashboard</span>
-                    </div>
-                  </Link>
-                  <Link href="/dashboard/listings" onClick={() => setMobileOpen(false)}>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-base text-white">My Listings</span>
-                    </div>
-                  </Link>
-                  <Link href="/dashboard/profile" onClick={() => setMobileOpen(false)}>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-base text-white">Profile</span>
-                    </div>
-                  </Link>
-                </>
-              )}
-
-              {user?.data?.role === "ADMIN" && (
-                <>
-                  <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-base text-white">Admin Dashboard</span>
-                    </div>
-                  </Link>
-                  <Link href="/dashboard/users" onClick={() => setMobileOpen(false)}>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-base text-white">Manage Users</span>
-                    </div>
-                  </Link>
-                  <Link href="/dashboard/listings" onClick={() => setMobileOpen(false)}>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-base text-white">Manage Listings</span>
-                    </div>
-                  </Link>
-                </>
-              )}
-            </div>
-
-            {/* FOOTER BUTTONS */}
-            <div className="px-6 pb-6 space-y-2.5">
-              {user?.data ? (
-                <button
-                  onClick={handleLogout}
-                  className="w-full bg-red-600 rounded-full py-2 text-xs font-semibold hover:bg-red-700 transition"
-                >
-                  Logout
-                </button>
-              ) : (
-                <>
+                {user?.data ? (
                   <button
                     onClick={() => {
-                      setOpen(true);
+                      handleLogout();
                       setMobileOpen(false);
                     }}
-                    className="w-full bg-blue-900 rounded-full py-2 text-xs font-semibold hover:bg-blue-800 transition"
+                    className="w-full bg-red-600 rounded-full py-3 text-sm font-semibold text-white hover:bg-red-700 transition-all duration-300 hover:scale-[1.02] active:scale-95"
                   >
-                    Sign In
+                    Logout
                   </button>
-                  <button
-                    onClick={() => {
-                      setRegisterOpen(true);
-                      setMobileOpen(false);
-                    }}
-                    className="w-full bg-gray-700 rounded-full py-2 text-xs font-semibold hover:bg-gray-600 transition"
-                  >
-                    Sign Up
-                  </button>
-                  <button
-                    onClick={() => {
-                      setGuideRegisterOpen(true);
-                      setMobileOpen(false);
-                    }}
-                    className="w-full bg-red-600 rounded-full py-2 text-xs font-semibold hover:bg-red-700 transition"
-                  >
-                    Become a Guide
-                  </button>
-                </>
-              )}
+                ) : (
+                  <>
+                    <button
+                      onClick={() => {
+                        setOpen(true);
+                        setMobileOpen(false);
+                      }}
+                      className="w-full bg-white text-black rounded-full py-3 text-sm font-semibold hover:bg-gray-200 transition-all duration-300 hover:scale-[1.02] active:scale-95"
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRegisterOpen(true);
+                        setMobileOpen(false);
+                      }}
+                      className="w-full bg-zinc-800 text-white rounded-full py-3 text-sm font-semibold hover:bg-zinc-700 transition-all duration-300 hover:scale-[1.02] active:scale-95"
+                    >
+                      Sign Up
+                    </button>
+                    <button
+                      onClick={() => {
+                        setGuideRegisterOpen(true);
+                        setMobileOpen(false);
+                      }}
+                      className="w-full bg-red-600 text-white rounded-full py-3 text-sm font-semibold hover:bg-red-700 transition-all duration-300 hover:scale-[1.02] active:scale-95"
+                    >
+                      Become a Guide
+                    </button>
+                  </>
+                )}
+              </motion.div>
             </div>
-          </div>
-        </div>
-      </>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Register modal (for Sign Up from mobile) */}
       <RegisterModal

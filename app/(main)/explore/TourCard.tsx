@@ -16,34 +16,45 @@ interface Tour {
 export default function TourCard({ tour }: { tour: Tour }) {
   return (
     <Link href={`/tours/${tour.slug}`}>
-      <div className="bg-white dark:bg-zinc-900 rounded-lg shadow hover:shadow-lg transition overflow-hidden">
-        <Image
-          src={tour.images[0] || "/placeholder.jpg"}
-          alt={tour.title}
-          width={300}
-          height={200}
-          className="w-full h-48 object-cover"
-          loading="lazy"
-        />
-        <div className="p-4">
-          <h3 className="font-bold text-lg mb-2 line-clamp-2">{tour.title}</h3>
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-            <MapPin className="h-4 w-4" />
-            <span>{tour.city}</span>
+      <div className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden hover:shadow-lg hover:shadow-zinc-200/50 dark:hover:shadow-zinc-900/50 transition-all duration-300">
+        {/* Image */}
+        <div className="relative h-44 overflow-hidden">
+          <Image
+            src={tour.images[0] || "/placeholder.jpg"}
+            alt={tour.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+          {/* Price badge */}
+          <div className="absolute bottom-3 left-3 px-3 py-1 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm rounded-lg">
+            <span className="text-sm font-bold text-zinc-900 dark:text-white">
+              ${tour.price}
+            </span>
+            <span className="text-xs text-zinc-500"> /person</span>
           </div>
-          <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              <span>{tour.duration}h</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
-              <span>{tour.maxGroupSize}</span>
-            </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold text-red-600">${tour.price}</span>
-            <span className="text-sm text-gray-500">per person</span>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 space-y-2.5">
+          <h3 className="font-semibold text-zinc-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition line-clamp-1">
+            {tour.title}
+          </h3>
+
+          <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+            <span className="flex items-center gap-1">
+              <MapPin size={12} />
+              {tour.city}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock size={12} />
+              {tour.duration}h
+            </span>
+            <span className="flex items-center gap-1">
+              <Users size={12} />
+              Max {tour.maxGroupSize}
+            </span>
           </div>
         </div>
       </div>

@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/backend/:path*",
-        destination: "https://local-tour-guide-backend-elom.onrender.com/api/:path*",
+        destination: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000/api"}/:path*`,
       },
     ];
   },

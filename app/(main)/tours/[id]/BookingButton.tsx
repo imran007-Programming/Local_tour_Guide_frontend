@@ -34,9 +34,9 @@ export default function BookingButton({
     <>
       <button
         onClick={handleBooking}
-        className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition font-semibold"
+        className="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 px-6 rounded-lg hover:from-red-700 hover:to-red-600 transition-all font-semibold text-sm lg:w-full lg:text-base"
       >
-        Book Now
+        Reserve
       </button>
 
       <BookingModal
