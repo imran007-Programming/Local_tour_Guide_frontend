@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import BookingsTable from "./BookingsTable";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -22,7 +23,9 @@ export default async function BookingsPage() {
               : "Track your tour bookings and payments"}
         </p>
       </div>
-      <BookingsTable user={user} />
+      <Suspense fallback={null}>
+        <BookingsTable user={user} />
+      </Suspense>
     </div>
   );
 }

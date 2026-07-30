@@ -15,7 +15,8 @@ export async function proxy(request: NextRequest) {
     const tokenRefreshResult = await getNewAccessToken();
 
     if (tokenRefreshResult.tokenRefreshed && tokenRefreshResult.accessToken) {
-        const response = NextResponse.next();
+        const url = request.nextUrl.clone();
+        const response = NextResponse.redirect(url);
         response.cookies.set("accessToken", tokenRefreshResult.accessToken, {
             httpOnly: false,
             secure: process.env.NODE_ENV === "production",

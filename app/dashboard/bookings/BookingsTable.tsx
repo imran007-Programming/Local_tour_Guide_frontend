@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
@@ -65,7 +64,7 @@ export default function BookingsTable({
   const [paymentLoading, setPaymentLoading] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successAnimation, setSuccessAnimation] = useState(null);
-  const searchParams = useSearchParams();
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
   const isGuide = user.data.role === "GUIDE";
   const isTourist = user.data.role === "TOURIST";
   const isAdmin = user.data.role === "ADMIN";
@@ -111,26 +110,8 @@ export default function BookingsTable({
   };
 
   useEffect(() => {
-    if (searchParams.get("payment") === "success") {
-      fetch("/payment_success/success.json")
-        .then((res) => res.json())
-        .then((data) => {
-          setSuccessAnimation(data);
-          setShowSuccess(true);
-          toast.success("Payment successful!");
-          setTimeout(() => {
-            setShowSuccess(false);
-            window.history.replaceState({}, "", window.location.pathname);
-          }, 3000);
-        })
-        .catch(() => {
-          toast.success("Payment successful!");
-          setTimeout(() => {
-            window.history.replaceState({}, "", window.location.pathname);
-          }, 3000);
-        });
-    }
-  }, [searchParams]);
+    // payment success is handled by /dashboard/bookings/[bookingId] page
+  }, []);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -164,12 +145,12 @@ export default function BookingsTable({
 
     const debounce = setTimeout(fetchBookings, 300);
     return () => clearTimeout(debounce);
-  }, [isGuide, isTourist, isAdmin, currentPage, searchTerm, statusFilter, sortBy, sortOrder]);
+  }, [isGuide, isTourist, isAdmin, currentPage, searchTerm, statusFilter, sortBy, sortOrder, refetchTrigger]);
 
   const handlePayment = async (bookingId: string) => {
     setPaymentLoading(bookingId);
     try {
-      const successUrl = `${window.location.origin}/dashboard/bookings?payment=success&session_id={CHECKOUT_SESSION_ID}`;
+      const successUrl = `${window.location.origin}/dashboard/bookings/${bookingId}?payment=success`;
       const cancelUrl = `${window.location.origin}/dashboard/bookings/payment-cancel`;
 
       await authFetch(`${BASE_URL}/payments/stripe/create-intent`, {
