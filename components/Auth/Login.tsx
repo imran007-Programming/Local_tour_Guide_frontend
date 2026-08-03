@@ -18,12 +18,14 @@ interface SignInModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   setRegisterOpen: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 export default function SignInModal({
   open,
   setOpen,
   setRegisterOpen,
+  onSuccess,
 }: SignInModalProps) {
   const {
     register,
@@ -36,10 +38,10 @@ export default function SignInModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
-  
+
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    
+
     try {
       const res = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
@@ -66,13 +68,16 @@ export default function SignInModal({
 
       toast.success("Login successful!");
       setOpen(false);
-      setIsRedirecting(true);
-      
-      // Safety: auto-dismiss overlay after 8 seconds if navigation fails
-      setTimeout(() => setIsRedirecting(false), 8000);
-      
-      router.push("/dashboard");
-      router.refresh();
+
+      if (onSuccess) {
+        onSuccess();
+        console.log("call on success");
+      } else {
+        setIsRedirecting(true);
+        setTimeout(() => setIsRedirecting(false), 8000);
+        router.push("/dashboard");
+        router.refresh();
+      }
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Login failed");
@@ -104,12 +109,20 @@ export default function SignInModal({
               <div className="relative">
                 <motion.div
                   animate={{ rotate: 360 }}
-                  transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                   className="w-14 h-14 rounded-full border-4 border-red-200 dark:border-red-900 border-t-red-500 dark:border-t-red-400"
                 />
                 <motion.div
                   animate={{ rotate: -360 }}
-                  transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 1.8,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                   className="absolute inset-1 w-10 h-10 rounded-full border-4 border-transparent border-b-red-400 dark:border-b-red-300"
                 />
               </div>
@@ -127,8 +140,8 @@ export default function SignInModal({
       </AnimatePresence>
 
       <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent
-        className="
+        <DialogContent
+          className="
         sm:max-w-md
         bg-white dark:bg-zinc-900
         border border-zinc-200 dark:border-zinc-800
@@ -142,160 +155,160 @@ export default function SignInModal({
         data-[state=open]:slide-in-from-top-10
         duration-500
         "
-      >
-        <div className="flex justify-between items-center">
-          <DialogTitle className="text-2xl cursor-pointer font-bold text-zinc-900 dark:text-white">
-            Sign In
-          </DialogTitle>
-          <button onClick={() => setOpen(false)} className="cursor-pointer">
-            <X className="cursor-pointer" />
-          </button>
-        </div>
+        >
+          <div className="flex justify-between items-center">
+            <DialogTitle className="text-2xl cursor-pointer font-bold text-zinc-900 dark:text-white">
+              Sign In
+            </DialogTitle>
+            <button onClick={() => setOpen(false)} className="cursor-pointer">
+              <X className="cursor-pointer" />
+            </button>
+          </div>
 
-        <p className="mt-2 text-sm text-center text-zinc-600 dark:text-zinc-400">
-          Sign in to start managing your DreamsTour account
-        </p>
+          <p className="mt-2 text-sm text-center text-zinc-600 dark:text-zinc-400">
+            Sign in to start managing your DreamsTour account
+          </p>
 
-        {/* FORM */}
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-          {/* Email */}
-          <div>
-            <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-              Email
-            </label>
-            <input
-              {...register("email")}
-              type="email"
-              placeholder="Enter Email"
-              className="mt-2 w-full px-4 py-3 rounded-md border
+          {/* FORM */}
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+            {/* Email */}
+            <div>
+              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                Email
+              </label>
+              <input
+                {...register("email")}
+                type="email"
+                placeholder="Enter Email"
+                className="mt-2 w-full px-4 py-3 rounded-md border
               border-zinc-300 dark:border-zinc-700
               bg-white dark:bg-zinc-800
               text-zinc-900 dark:text-white
               focus:ring-2 focus:ring-red-500 outline-none"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
+              />
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
 
-          {/* Password */}
-          {/* Password */}
-          <div>
-            <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-              Password
-            </label>
+            {/* Password */}
+            {/* Password */}
+            <div>
+              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                Password
+              </label>
 
-            <div className="relative mt-2">
-              <input
-                {...register("password")}
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter Password"
-                className="w-full px-4 pr-10 py-3 rounded-md border
+              <div className="relative mt-2">
+                <input
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter Password"
+                  className="w-full px-4 pr-10 py-3 rounded-md border
       border-zinc-300 dark:border-zinc-700
       bg-white dark:bg-zinc-800
       text-zinc-900 dark:text-white
       focus:ring-2 focus:ring-red-500 outline-none"
-              />
+                />
 
-              {/* Eye Button */}
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-red-500 cursor-pointer"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+                {/* Eye Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-red-500 cursor-pointer"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
-            {errors.password && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
+            {/* Remember Me */}
+            <div className="flex justify-between items-center text-sm">
+              <label className="flex items-center gap-2 text-zinc-700 dark:text-zinc-400">
+                <input type="checkbox" {...register("remember")} />
+                Remember Me
+              </label>
+              <span className="text-red-500 cursor-pointer">
+                Forgot Password?
+              </span>
+            </div>
 
-          {/* Remember Me */}
-          <div className="flex justify-between items-center text-sm">
-            <label className="flex items-center gap-2 text-zinc-700 dark:text-zinc-400">
-              <input type="checkbox" {...register("remember")} />
-              Remember Me
-            </label>
-            <span className="text-red-500 cursor-pointer">
-              Forgot Password?
-            </span>
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isLoading || isSubmitting}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
-          >
-            {isLoading ? (
-              <>
-                <Spinner size="sm" className="border-white" />
-                Logging in...
-              </>
-            ) : (
-              "Login →"
-            )}
-          </button>
-
-          {/* Switch to Register */}
-          <div
-            onClick={() => {
-              setRegisterOpen(true);
-              setOpen(false);
-            }}
-            className="text-center text-sm text-zinc-600 dark:text-zinc-400 cursor-pointer"
-          >
-            Don’t have an account?{" "}
-            <span className="text-red-500 cursor-pointer">Sign up</span>
-          </div>
-        </form>
-
-        {/* Quick Login Buttons */}
-        <div className="pt-4 border-t dark:border-zinc-700">
-          <p className="text-xs text-center text-zinc-500 dark:text-zinc-400 mb-3">
-            Quick Login (Demo)
-          </p>
-          <div className="grid grid-cols-3 gap-2">
+            {/* Submit */}
             <button
-              type="button"
-              disabled={isLoading}
-              onClick={() =>
-                onSubmit({ email: "admin@gmail.com", password: "52535455" })
-              }
-              className="px-3 py-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer disabled:opacity-50"
+              type="submit"
+              disabled={isLoading || isSubmitting}
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
-              Admin
+              {isLoading ? (
+                <>
+                  <Spinner size="sm" className="border-white" />
+                  Logging in...
+                </>
+              ) : (
+                "Login →"
+              )}
             </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() =>
-                onSubmit({ email: "guide@gmail.com", password: "123456" })
-              }
-              className="px-3 py-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer disabled:opacity-50"
+
+            {/* Switch to Register */}
+            <div
+              onClick={() => {
+                setRegisterOpen(true);
+                setOpen(false);
+              }}
+              className="text-center text-sm text-zinc-600 dark:text-zinc-400 cursor-pointer"
             >
-              Guide
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={() =>
-                onSubmit({ email: "tourist@gmail.com", password: "123456" })
-              }
-              className="px-3 py-2 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 transition cursor-pointer disabled:opacity-50"
-            >
-              Tourist
-            </button>
+              Don’t have an account?{" "}
+              <span className="text-red-500 cursor-pointer">Sign up</span>
+            </div>
+          </form>
+
+          {/* Quick Login Buttons */}
+          <div className="pt-4 border-t dark:border-zinc-700">
+            <p className="text-xs text-center text-zinc-500 dark:text-zinc-400 mb-3">
+              Quick Login (Demo)
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() =>
+                  onSubmit({ email: "admin@gmail.com", password: "52535455" })
+                }
+                className="px-3 py-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer disabled:opacity-50"
+              >
+                Admin
+              </button>
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() =>
+                  onSubmit({ email: "guide@gmail.com", password: "123456" })
+                }
+                className="px-3 py-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer disabled:opacity-50"
+              >
+                Guide
+              </button>
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={() =>
+                  onSubmit({ email: "tourist@gmail.com", password: "123456" })
+                }
+                className="px-3 py-2 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 transition cursor-pointer disabled:opacity-50"
+              >
+                Tourist
+              </button>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

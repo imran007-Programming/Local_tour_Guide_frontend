@@ -7,18 +7,18 @@
 @theme inline {
   --font-family-poppins: var(--font-poppins);
 
-  /* ── Brand color: Deep Violet (replaces red across the whole site) ── */
-  --color-red-50:  oklch(0.969 0.016 293.756);
-  --color-red-100: oklch(0.943 0.029 294.588);
-  --color-red-200: oklch(0.894 0.057 293.283);
-  --color-red-300: oklch(0.811 0.111 293.571);
-  --color-red-400: oklch(0.702 0.183 293.541);
-  --color-red-500: oklch(0.606 0.250 292.717);
-  --color-red-600: oklch(0.541 0.281 293.009);
-  --color-red-700: oklch(0.491 0.270 292.581);
-  --color-red-800: oklch(0.432 0.232 292.759);
-  --color-red-900: oklch(0.380 0.189 293.745);
-  --color-red-950: oklch(0.283 0.141 291.089);
+  /* ── Brand color: Indigo (replaces red across the whole site) ── */
+  --color-red-50:  oklch(0.962 0.018 272.314);
+  --color-red-100: oklch(0.930 0.034 272.788);
+  --color-red-200: oklch(0.870 0.065 274.039);
+  --color-red-300: oklch(0.785 0.115 274.713);
+  --color-red-400: oklch(0.673 0.182 276.935);
+  --color-red-500: oklch(0.585 0.233 277.117);
+  --color-red-600: oklch(0.511 0.262 276.966);
+  --color-red-700: oklch(0.457 0.240 277.023);
+  --color-red-800: oklch(0.398 0.195 277.366);
+  --color-red-900: oklch(0.359 0.144 278.697);
+  --color-red-950: oklch(0.257 0.090 281.288);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

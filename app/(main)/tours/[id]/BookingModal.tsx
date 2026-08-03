@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { BASE_URL } from "@/lib/config";
 import { authFetch } from "@/lib/authFetch";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface BookingModalProps {
   open: boolean;
@@ -24,6 +25,7 @@ export default function BookingModal({
   const [time, setTime] = useState("10:00");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,13 +58,14 @@ export default function BookingModal({
       setDate(undefined);
       setTime("10:00");
       setMessage("");
+      router.push("/dashboard/bookings");
     }
     setLoading(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl">
+      <DialogContent className="w-[95vw] max-w-xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl">
         <div className="flex justify-between items-center mb-4">
           <DialogTitle className="text-2xl font-bold">Book Tour</DialogTitle>
           <button onClick={() => setOpen(false)}>
@@ -71,42 +74,46 @@ export default function BookingModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium mb-2 block">
-              Select Date
-            </label>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border w-full"
-              disabled={(date) => date <= new Date()}
-            />
-          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-2 block">
+                Select Date
+              </label>
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                className="rounded-md border w-full [&>*]:w-full"
+                disabled={(date) => date <= new Date()}
+              />
+            </div>
 
-          <div>
-            <label className="text-sm font-medium mb-2 block">
-              Select Time
-            </label>
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-full p-3 border rounded-lg dark:bg-zinc-900"
-              required
-            />
-          </div>
+            <div className="flex-1 flex flex-col gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Select Time
+                </label>
+                <input
+                  type="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className="w-full p-3 border rounded-lg dark:bg-zinc-900"
+                  required
+                />
+              </div>
 
-          <div>
-            <label className="text-sm font-medium mb-2 block">
-              Message (Optional)
-            </label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Any special requests or questions..."
-              className="w-full p-3 border rounded-lg dark:bg-zinc-900 min-h-24"
-            />
+              <div className="flex-1">
+                <label className="text-sm font-medium mb-2 block">
+                  Message (Optional)
+                </label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Any special requests or questions..."
+                  className="w-full p-3 border rounded-lg dark:bg-zinc-900 h-32 sm:h-[calc(100%-2rem)]"
+                />
+              </div>
+            </div>
           </div>
 
           <button

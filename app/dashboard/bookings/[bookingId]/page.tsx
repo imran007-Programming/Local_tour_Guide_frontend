@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { authFetch } from "@/lib/authFetch";
 import { BASE_URL } from "@/lib/config";
 import { toast } from "sonner";
+import Lottie from "lottie-react";
+import successAnimation from "@/public/payment_success/success.json";
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
   const params = useParams();
   const bookingId = params.bookingId as string;
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
     if (!bookingId) {
@@ -17,21 +20,32 @@ export default function PaymentSuccessPage() {
       return;
     }
 
-    console.log("verify calling for bookingId:", bookingId);
-
     authFetch(`${BASE_URL}/payments/verify`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ bookingId }),
     })
-      .then((res) => {
+      .then(() => {
+        setVerified(true);
         toast.success("Payment successful!");
+        setTimeout(() => router.replace("/dashboard/bookings"), 3000);
       })
-      .catch(() => {})
-      .finally(() => {
+      .catch(() => {
         router.replace("/dashboard/bookings");
       });
   }, [bookingId]);
+
+  if (verified) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-64 h-64">
+          <Lottie animationData={successAnimation} loop={false} />
+        </div>
+        <h1 className="text-2xl font-bold text-green-600 mt-2">Payment Successful!</h1>
+        <p className="text-zinc-500 mt-1">Redirecting to your bookings...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
