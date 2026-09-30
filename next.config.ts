@@ -2,11 +2,11 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
+    // Only optimise images from hosts the app actually uses, so the image
+    // endpoint can't be used to proxy/resize arbitrary third-party images.
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**",
-      },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  compiler: {
+    // Strip debug logs from production bundles, keep errors and warnings
+    removeConsole:
+      process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
+  },
   compress: true,
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
@@ -34,6 +39,7 @@ const nextConfig: NextConfig = {
       'sonner',
       'embla-carousel-react',
       'date-fns',
+      'recharts',
     ],
     scrollRestoration: true,
   },

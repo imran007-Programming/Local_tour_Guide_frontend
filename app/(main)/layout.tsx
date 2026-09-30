@@ -1,16 +1,16 @@
 import Footer from "@/components/home/Footer";
 import Navbar from "@/components/navbar/navbar";
-import { getCurrentUser } from "@/lib/auth";
-export default async function MainLayout({
+
+// No cookies are read here, so public pages can be statically generated and
+// cached. The navbar loads the signed-in user in the browser.
+export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
-
   return (
     <>
-      <Navbar user={user} />
+      <Navbar />
       {children}
       <Footer />
     </>

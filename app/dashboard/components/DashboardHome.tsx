@@ -1,20 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
-  CartesianGrid,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { authFetch } from "@/lib/authFetch";
 import { BASE_URL } from "@/lib/config";
 import { User } from "@/types/user";
@@ -33,6 +20,23 @@ import {
   Wallet,
 } from "lucide-react";
 import { motion } from "framer-motion";
+
+// Charts (recharts) are code-split and loaded after the page shell renders
+const chartFallback = () => (
+  <div className="h-full w-full animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+);
+const BookingsAreaChart = dynamic(
+  () => import("./DashboardCharts").then((m) => m.BookingsAreaChart),
+  { ssr: false, loading: chartFallback },
+);
+const StatusPieChart = dynamic(
+  () => import("./DashboardCharts").then((m) => m.StatusPieChart),
+  { ssr: false, loading: chartFallback },
+);
+const MonthlyBarChart = dynamic(
+  () => import("./DashboardCharts").then((m) => m.MonthlyBarChart),
+  { ssr: false, loading: chartFallback },
+);
 
 export default function DashboardPage({ user }: { user: User }) {
   const [stats, setStats] = useState({
@@ -253,28 +257,11 @@ export default function DashboardPage({ user }: { user: User }) {
                 </div>
               </div>
               <div className="h-[260px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthlyData}>
-                    <defs>
-                      <linearGradient id="bookingGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={role === "TOURIST" ? "#F43F5E" : "#6366F1"} stopOpacity={0.3} />
-                        <stop offset="100%" stopColor={role === "TOURIST" ? "#F43F5E" : "#6366F1"} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9CA3AF" }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9CA3AF" }} />
-                    <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", fontSize: "12px" }} />
-                    <Area
-                      type="monotone"
-                      dataKey="bookings"
-                      stroke={role === "TOURIST" ? "#F43F5E" : "#6366F1"}
-                      strokeWidth={2.5}
-                      fill="url(#bookingGradient)"
-                      name={role === "TOURIST" ? "Trips" : "Bookings"}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <BookingsAreaChart
+                  data={monthlyData}
+                  color={role === "TOURIST" ? "#F43F5E" : "#6366F1"}
+                  label={role === "TOURIST" ? "Trips" : "Bookings"}
+                />
               </div>
             </motion.div>
 
@@ -293,16 +280,7 @@ export default function DashboardPage({ user }: { user: User }) {
               </p>
 
               <div className="h-[180px] flex items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={bookingStats} dataKey="value" innerRadius={55} outerRadius={80} paddingAngle={3} strokeWidth={0}>
-                      {bookingStats.map((entry, index) => (
-                        <Cell key={index} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "12px" }} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <StatusPieChart data={bookingStats} />
               </div>
 
               <div className="space-y-2.5 mt-4">
@@ -344,20 +322,11 @@ export default function DashboardPage({ user }: { user: User }) {
               </div>
             </div>
             <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyData} barSize={32}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} vertical={false} />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9CA3AF" }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#9CA3AF" }} />
-                  <Tooltip cursor={{ fill: "rgba(99, 102, 241, 0.05)" }} contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", fontSize: "12px" }} />
-                  <Bar
-                    dataKey="bookings"
-                    fill={role === "TOURIST" ? "#F43F5E" : role === "GUIDE" ? "#10B981" : "#6366F1"}
-                    radius={[8, 8, 0, 0]}
-                    name={role === "TOURIST" ? "Trips" : "Bookings"}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <MonthlyBarChart
+                data={monthlyData}
+                color={role === "TOURIST" ? "#F43F5E" : role === "GUIDE" ? "#10B981" : "#6366F1"}
+                label={role === "TOURIST" ? "Trips" : "Bookings"}
+              />
             </div>
           </motion.div>
         </>

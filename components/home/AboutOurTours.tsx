@@ -1,189 +1,110 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
+import aboutImage from "@/public/images/chris-karidis-nnzkZNYWHaU-unsplash.jpg";
 import { motion } from "framer-motion";
-import { MapPin, Users, Star, Globe, ShieldCheck, Headphones, ArrowRight } from "lucide-react";
+import { ShieldCheck, Headphones, MapPin, ArrowRight } from "lucide-react";
 import { NumberTicker } from "../ui/number-ticker";
 
 const stats = [
-  { icon: Globe,  label: "Destinations",    value: 50,   color: "#14b8a6" },
-  { icon: MapPin, label: "Tours Completed",  value: 7000, color: "#f43f5e" },
-  { icon: Users,  label: "Happy Clients",    value: 100,  color: "#f59e0b" },
-  { icon: Star,   label: "Verified Guides",  value: 89,   color: "#6366f1" },
+  { label: "Destinations", value: 50 },
+  { label: "Tours completed", value: 7000 },
+  { label: "Happy clients", value: 100 },
+  { label: "Verified guides", value: 89 },
 ];
 
 const features = [
   {
     icon: ShieldCheck,
-    title: "100% Verified Guides",
-    desc: "Every guide is background-checked, trained, and rated by real travellers.",
-    color: "#14b8a6",
+    title: "Verified guides",
+    desc: "Every guide is background-checked, trained and rated by real travellers.",
   },
   {
     icon: Headphones,
-    title: "24/7 Support",
-    desc: "Our team is always available to help you before, during, and after your trip.",
-    color: "#f43f5e",
+    title: "Support around the clock",
+    desc: "We are here before, during and after your trip.",
   },
   {
     icon: MapPin,
-    title: "Local Expertise",
-    desc: "Authentic experiences crafted by people who truly know their destination.",
-    color: "#6366f1",
+    title: "Real local knowledge",
+    desc: "Experiences crafted by people who truly know their city.",
   },
 ];
 
 export default function AboutSection() {
   return (
-    <section className="py-16 md:py-24 bg-gray-50 dark:bg-zinc-950 overflow-hidden">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-
-        {/* Top: image + content */}
-        <div className="grid lg:grid-cols-2 gap-10 items-center mb-10">
-
-          {/* Left — image */}
+    <section className="bg-white py-20 md:py-24 dark:bg-zinc-950">
+      <div className="container-page">
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative h-96 lg:h-125"
+            className="relative aspect-4/3 overflow-hidden rounded-3xl bg-zinc-100 lg:aspect-square dark:bg-zinc-900"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/chris-karidis-nnzkZNYWHaU-unsplash.jpg"
-              alt="Travellers exploring"
-              className="w-full h-full object-cover rounded-3xl"
+            <Image
+              src={aboutImage}
+              alt="Travellers exploring a city"
+              fill
+              placeholder="blur"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
             />
-            <div className="absolute inset-0 rounded-3xl bg-linear-to-t from-black/50 via-transparent to-transparent" />
-
-            {/* Floating badge — top right */}
-            <div className="absolute top-6 right-6 bg-white dark:bg-zinc-800 rounded-2xl px-5 py-4 shadow-xl">
-              <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Avg Rating</p>
-              <div className="flex items-center gap-1 mt-1">
-                {[1,2,3,4,5].map(s => (
-                  <Star key={s} size={14} className="fill-yellow-400 text-yellow-400" />
-                ))}
-                <span className="text-sm font-bold text-gray-900 dark:text-white ml-1">5.0</span>
-              </div>
-            </div>
-
-            {/* Floating badge — bottom left */}
-            <div className="absolute bottom-6 left-6 bg-white dark:bg-zinc-800 rounded-2xl px-5 py-4 shadow-xl flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse block" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-400 font-semibold">Active Bookings</p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">2,500+</p>
-              </div>
-            </div>
           </motion.div>
 
-          {/* Right — content */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="text-red-500 text-xs font-bold tracking-[0.2em] uppercase">— About Us</span>
-            <h2 className="mt-3 text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
-              Explore Beyond <br />
-              <span className="text-red-500">the Horizon</span>
-            </h2>
-            <p className="mt-5 text-gray-500 dark:text-gray-400 leading-relaxed">
-              We pride ourselves on offering personalized services for travellers worldwide,
-              crafting unique and unforgettable experiences led by passionate local experts.
+          <div>
+            <p className="eyebrow">About us</p>
+            <h2 className="section-title mt-2">Built for travellers who want more than a checklist</h2>
+            <p className="mt-5 leading-relaxed text-zinc-600 dark:text-zinc-400">
+              We connect you with passionate local experts who turn a trip into a story —
+              personal, unhurried and genuinely local.
             </p>
 
-            {/* Feature list */}
-            <div className="mt-8 flex flex-col gap-5">
-              {features.map((f, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.1 }}
-                  className="flex items-start gap-4"
-                >
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: `${f.color}18` }}
-                  >
-                    <f.icon className="w-5 h-5" style={{ color: f.color }} />
-                  </div>
+            <ul className="mt-8 space-y-6">
+              {features.map((f) => (
+                <li key={f.title} className="flex gap-4">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800">
+                    <f.icon className="size-4.5 text-zinc-900 dark:text-white" strokeWidth={1.75} />
+                  </span>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm">{f.title}</h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{f.desc}</p>
+                    <h3 className="font-medium text-zinc-900 dark:text-white">{f.title}</h3>
+                    <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{f.desc}</p>
                   </div>
-                </motion.div>
+                </li>
               ))}
-            </div>
+            </ul>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: 0.35 }}
-              className="mt-8 flex items-center gap-4"
-            >
-              <a
+            <div className="mt-10 flex flex-wrap items-center gap-6">
+              <Link
                 href="/explore"
-                className="group inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-full transition-all duration-300 shadow-md hover:shadow-red-200 dark:hover:shadow-red-900 hover:shadow-lg text-sm"
+                className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
               >
-                Explore Tours
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
-              </a>
-              <a
+                Explore tours
+                <ArrowRight size={15} />
+              </Link>
+              <Link
                 href="/guides"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-300"
+                className="text-sm font-medium text-zinc-900 underline-offset-4 hover:underline dark:text-white"
               >
-                Meet our Guides
-                <ArrowRight size={14} />
-              </a>
-            </motion.div>
-          </motion.div>
+                Meet our guides
+              </Link>
+            </div>
+          </div>
         </div>
 
-        {/* Stats row */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-10"
-        >
-          {stats.map((s, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
-              className="bg-white dark:bg-zinc-800 rounded-2xl p-3 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 text-center sm:text-left"
-            >
-              {/* Icon */}
-              <div
-                className="shrink-0 w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center"
-                style={{ background: `${s.color}15` }}
-              >
-                <s.icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: s.color }} />
-              </div>
-
-              {/* Text */}
-              <div>
-                <p className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white leading-none">
-                  <NumberTicker value={s.value} />+
-                </p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-medium leading-snug">
-                  {s.label}
-                </p>
-              </div>
-            </motion.div>
+        {/* Stats */}
+        <div className="mt-20 grid grid-cols-2 gap-y-10 border-t border-zinc-200 pt-10 md:grid-cols-4 dark:border-zinc-800">
+          {stats.map((s) => (
+            <div key={s.label} className="md:border-l md:border-zinc-200 md:pl-6 md:first:border-l-0 md:first:pl-0 dark:md:border-zinc-800">
+              <p className="text-3xl font-semibold tracking-tight text-zinc-900 sm:text-4xl dark:text-white">
+                <NumberTicker value={s.value} className="tracking-tight text-zinc-900 dark:text-white" />+
+              </p>
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{s.label}</p>
+            </div>
           ))}
-        </motion.div>
-
+        </div>
       </div>
     </section>
   );

@@ -100,16 +100,15 @@ export default function WishlistButton({
     <button
       onClick={toggleWishlist}
       disabled={loading}
-      className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition disabled:opacity-50"
+      className="flex h-9 items-center gap-2 rounded-md border border-zinc-200 px-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
       title={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+      aria-pressed={isInWishlist}
     >
       <Heart
-        className={`w-6 h-6 transition-colors ${
-          isInWishlist
-            ? "fill-red-500 text-red-500"
-            : "text-gray-400 hover:text-red-500"
-        }`}
+        size={15}
+        className={isInWishlist ? "fill-rose-500 text-rose-500" : ""}
       />
+      {isInWishlist ? "Saved" : "Save"}
     </button>
   );
 }

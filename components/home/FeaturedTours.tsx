@@ -1,29 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MapPin, Clock, Users, Star, ArrowRight, UserCircle } from "lucide-react";
-import { CLIENT_BASE_URL as BASE_URL } from "@/lib/config";
-
-interface Tour {
-  id: string;
-  title: string;
-  slug: string;
-  price: number;
-  duration: number;
-  city: string;
-  category: string;
-  images: string[];
-  maxGroupSize: number;
-  averageRating?: number;
-  reviewCount?: number;
-  guide?: {
-    user?: {
-      name?: string;
-    };
-  };
-}
+import { Star, ArrowRight } from "lucide-react";
+import type { TourSummary } from "@/lib/publicApi";
 
 const FALLBACKS = [
   "/hero/Hero1.jpg",
@@ -32,199 +14,91 @@ const FALLBACKS = [
   "/hero/Hero4.jpg",
 ];
 
-function TourSkeleton() {
-  return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow overflow-hidden">
-      <div className="h-52 bg-gray-200 dark:bg-zinc-800 animate-pulse" />
-      <div className="p-4 space-y-3">
-        <div className="h-4 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse w-3/4" />
-        <div className="h-3 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse w-1/2" />
-        <div className="h-3 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse w-2/3" />
-        <div className="h-6 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse w-1/3 mt-2" />
-      </div>
-    </div>
-  );
-}
-
-function TourCard({ tour, index }: { tour: Tour; index: number }) {
+export function TourCard({ tour, index }: { tour: TourSummary; index: number }) {
   const fallback = FALLBACKS[index % FALLBACKS.length];
   const [imgSrc, setImgSrc] = useState<string>(tour.images?.[0] || fallback);
+  const rating = tour.averageRating ?? 0;
+
+  const meta = [
+    tour.city,
+    tour.duration ? `${tour.duration}h` : null,
+    tour.maxGroupSize ? `Up to ${tour.maxGroupSize}` : null,
+  ].filter(Boolean);
 
   return (
     <motion.div
-      className="h-full"
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.4, delay: index * 0.08 }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
     >
-      <Link href={`/tours/${tour.slug}`} className="group flex h-full">
-        <div className="flex flex-col w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-          {/* Image */}
-          <div className="relative shrink-0 overflow-hidden" style={{ height: '220px' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imgSrc}
-              alt={tour.title}
-              className="block w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              style={{ height: '220px', width: '100%' }}
-              loading="lazy"
-              onError={() => setImgSrc(fallback)}
-            />
-            {tour.category && (
-              <span className="absolute top-3 left-3 bg-white/90 dark:bg-zinc-900/90 text-gray-800 dark:text-white text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
-                {tour.category.charAt(0) + tour.category.slice(1).toLowerCase()}
-              </span>
-            )}
-            <span className="absolute top-3 right-3 bg-red-600 text-white text-sm font-bold px-3 py-1 rounded-full shadow">
-              ${tour.price}
+      <Link href={`/tours/${tour.slug}`} className="group block">
+        <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-900">
+          <Image
+            src={imgSrc}
+            alt={tour.title}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            onError={() => setImgSrc(fallback)}
+          />
+          {tour.category && (
+            <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-xs font-medium text-zinc-800 dark:bg-zinc-900/95 dark:text-zinc-200">
+              {tour.category.charAt(0) + tour.category.slice(1).toLowerCase()}
             </span>
-          </div>
-
-          {/* Content */}
-          <div className="p-4 flex flex-col flex-1">
-            <h3 className="font-bold text-base text-gray-900 dark:text-white line-clamp-2 mb-2 group-hover:text-red-500 transition-colors">
-              {tour.title}
-            </h3>
-
-            {(tour.averageRating ?? 0) > 0 && (
-              <div className="flex items-center gap-1 mb-2">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <Star
-                    key={s}
-                    size={12}
-                    className={
-                      s <= Math.round(tour.averageRating!)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "fill-gray-200 text-gray-200 dark:fill-zinc-700 dark:text-zinc-700"
-                    }
-                  />
-                ))}
-                <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                  {tour.averageRating!.toFixed(1)}
-                  {tour.reviewCount ? ` (${tour.reviewCount})` : ""}
-                </span>
-              </div>
-            )}
-
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400 mb-3">
-              <span className="flex items-center gap-1">
-                <MapPin size={13} /> {tour.city}
-              </span>
-              {tour.duration && (
-                <span className="flex items-center gap-1">
-                  <Clock size={13} /> {tour.duration}h
-                </span>
-              )}
-              {tour.maxGroupSize && (
-                <span className="flex items-center gap-1">
-                  <Users size={13} /> Max {tour.maxGroupSize}
-                </span>
-              )}
-            </div>
-
-            {tour.guide?.user?.name && (
-              <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 mb-3">
-                <UserCircle size={14} />
-                <span>Guide: <span className="font-medium text-gray-700 dark:text-gray-300">{tour.guide.user.name}</span></span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-zinc-800 mt-auto">
-              <div>
-                <span className="text-xl font-extrabold text-red-600">${tour.price}</span>
-                <span className="text-xs text-gray-400 ml-1">/ person</span>
-              </div>
-              <span className="text-xs font-semibold text-red-500 flex items-center gap-1 group-hover:gap-2 transition-all">
-                Book Now <ArrowRight size={13} />
-              </span>
-            </div>
-          </div>
+          )}
         </div>
+
+        <div className="mt-4 flex items-start justify-between gap-3">
+          <h3 className="line-clamp-1 font-medium text-zinc-900 dark:text-white">{tour.title}</h3>
+          {rating > 0 && (
+            <span className="flex shrink-0 items-center gap-1 text-sm text-zinc-700 dark:text-zinc-300">
+              <Star size={13} className="fill-zinc-900 text-zinc-900 dark:fill-white dark:text-white" />
+              {rating.toFixed(1)}
+            </span>
+          )}
+        </div>
+
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{meta.join(" · ")}</p>
+        {tour.guide?.user?.name && (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">with {tour.guide.user.name}</p>
+        )}
+
+        <p className="mt-2 text-sm text-zinc-900 dark:text-white">
+          <span className="font-semibold">${tour.price}</span>
+          <span className="text-zinc-500 dark:text-zinc-400"> / person</span>
+        </p>
       </Link>
     </motion.div>
   );
 }
 
-export default function FeaturedTours() {
-  const [tours, setTours] = useState<Tour[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch(`${BASE_URL}/tour?limit=6&sortBy=createdAt&sortOrder=desc`, {
-      signal: controller.signal,
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        console.log("Tour list API response (first item):", data.data?.[0]);
-        setTours(data.data || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") setLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
-
+export default function FeaturedTours({ tours }: { tours: TourSummary[] }) {
   return (
-    <section className="py-16 md:py-20 bg-gray-50 dark:bg-zinc-950">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="relative flex flex-col items-center mb-10 text-center"
-        >
-          <span className="text-red-500 text-sm font-semibold tracking-widest uppercase">
-            — Featured Tours
-          </span>
-          <h2 className="mt-2 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight whitespace-nowrap">
-            Top Picks <span className="text-red-500">For You</span>
-          </h2>
-          <p className="mt-3 pb-2 text-gray-500 dark:text-gray-400 max-w-lg text-sm">
-            Hand-selected tours loved by travellers — book yours today.
-          </p>
+    <section className="bg-white py-20 md:py-24 dark:bg-zinc-950">
+      <div className="container-page">
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="eyebrow">Featured tours</p>
+            <h2 className="section-title mt-2">Popular right now</h2>
+          </div>
           <Link
             href="/explore"
-            className="mt-3 md:mt-0 md:absolute md:right-0 md:top-0 flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-600 transition group shrink-0"
+            className="group inline-flex items-center gap-1.5 text-sm font-medium text-zinc-900 dark:text-white"
           >
             View all tours
-            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+            <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
           </Link>
-        </motion.div>
+        </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => <TourSkeleton key={i} />)}
-          </div>
-        ) : tours.length === 0 ? (
-          <p className="text-center text-gray-400 py-20">No tours available yet.</p>
+        {tours.length === 0 ? (
+          <p className="py-20 text-center text-zinc-500">No tours available yet.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {tours.map((tour, i) => (
               <TourCard key={tour.id} tour={tour} index={i} />
             ))}
           </div>
-        )}
-
-        {!loading && tours.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-center mt-12"
-          >
-            <Link
-              href="/explore"
-              className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full font-semibold transition-colors shadow-lg"
-            >
-              Explore All Tours
-              <ArrowRight size={18} />
-            </Link>
-          </motion.div>
         )}
       </div>
     </section>

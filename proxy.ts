@@ -17,11 +17,14 @@ export async function proxy(request: NextRequest) {
     if (tokenRefreshResult.tokenRefreshed && tokenRefreshResult.accessToken) {
         const url = request.nextUrl.clone();
         const response = NextResponse.redirect(url);
+        // Same settings as loginAction; a short maxAge here forced a refresh
+        // and redirect on almost every dashboard navigation.
         response.cookies.set("accessToken", tokenRefreshResult.accessToken, {
-            httpOnly: false,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 10
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 15 * 60,
+            path: "/",
         });
         return response;
     }

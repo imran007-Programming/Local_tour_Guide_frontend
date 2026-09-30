@@ -8,7 +8,12 @@ async function getTour(slug: string) {
   });
   if (!res?.ok) return null;
   const data = await res.json();
-  return data.data;
+  if (!data.data) return null;
+  // Drop the nested guide/user record: the form doesn't need it and it would
+  // otherwise be serialised into the page (it includes private user fields).
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { guide, ...tour } = data.data;
+  return tour;
 }
 
 export default async function EditTourPage({

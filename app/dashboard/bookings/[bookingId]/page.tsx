@@ -5,8 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { authFetch } from "@/lib/authFetch";
 import { BASE_URL } from "@/lib/config";
 import { toast } from "sonner";
-import Lottie from "lottie-react";
-import successAnimation from "@/public/payment_success/success.json";
+import SuccessAnimation from "@/components/SuccessAnimation";
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
@@ -38,9 +37,7 @@ export default function PaymentSuccessPage() {
   if (verified) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="w-64 h-64">
-          <Lottie animationData={successAnimation} loop={false} />
-        </div>
+        <SuccessAnimation className="w-64 h-64" />
         <h1 className="text-2xl font-bold text-green-600 mt-2">Payment Successful!</h1>
         <p className="text-zinc-500 mt-1">Redirecting to your bookings...</p>
       </div>

@@ -125,117 +125,126 @@ export default function TourReviews({
   if (loading) {
     return (
       <div className="flex justify-center py-10">
-        <Spinner size="lg" className="text-red-500" />
+        <Spinner size="md" className="text-zinc-400" />
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Reviews ({reviews.length})</h2>
+  const average =
+    reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
 
-      {/* Reviews List */}
-      <div className="space-y-4">
-        {reviews.length === 0 ? (
-          <p className="text-gray-500 text-center py-10">
-            No reviews yet. Be the first to review!
-          </p>
-        ) : (
-          reviews.map((review) => (
-            <div
-              key={review.id}
-              className="p-6 bg-gray-50 dark:bg-zinc-800 rounded-lg"
-            >
-              <div className="flex items-start gap-4">
-                <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+  return (
+    <div>
+      <h2 className="flex items-center gap-2 text-xl font-semibold text-zinc-900 dark:text-white">
+        {reviews.length > 0 && (
+          <>
+            <Star size={18} className="fill-zinc-900 text-zinc-900 dark:fill-white dark:text-white" />
+            {average.toFixed(1)}
+            <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          </>
+        )}
+        {reviews.length} review{reviews.length === 1 ? "" : "s"}
+      </h2>
+
+      {reviews.length === 0 ? (
+        <p className="mt-4 text-zinc-500 dark:text-zinc-400">
+          No reviews yet. Travellers who complete this tour can leave the first one.
+        </p>
+      ) : (
+        <div className="mt-8 grid gap-x-12 gap-y-8 md:grid-cols-2">
+          {reviews.map((review) => (
+            <article key={review.id}>
+              <div className="flex items-center gap-3">
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-900">
                   <Image
                     src={review?.tourist?.user?.profilePic || "/avatar.png"}
-                    alt={review?.tourist?.user?.name}
+                    alt=""
                     fill
-                    sizes="48px"
+                    sizes="40px"
                     className="object-cover"
                   />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">
-                      {review?.tourist?.user?.name}
-                    </h4>
-                    <span className="text-sm text-gray-500">
-                      {new Date(review.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex gap-1 mb-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        size={16}
-                        className={
-                          star <= review.rating
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
-                        }
-                      />
-                    ))}
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {review.comment}
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-zinc-900 dark:text-white">
+                    {review?.tourist?.user?.name}
+                  </p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {new Date(review.createdAt).toLocaleDateString(undefined, {
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </p>
                 </div>
               </div>
-            </div>
-          ))
-        )}
-      </div>
+              <div className="mt-3 flex gap-0.5" aria-label={`${review.rating} out of 5 stars`}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={12}
+                    className={
+                      star <= review.rating
+                        ? "fill-zinc-900 text-zinc-900 dark:fill-white dark:text-white"
+                        : "fill-zinc-200 text-zinc-200 dark:fill-zinc-800 dark:text-zinc-800"
+                    }
+                  />
+                ))}
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                {review.comment}
+              </p>
+            </article>
+          ))}
+        </div>
+      )}
 
-      {/* Submit Review Form - Only for Tourists */}
+      {/* Write a review (tourists only) */}
       {userRole === "TOURIST" && (
         <form
           onSubmit={handleSubmit}
-          className="p-6 bg-gray-50 dark:bg-zinc-800 rounded-lg space-y-4"
+          className="mt-10 space-y-5 rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800"
         >
-          <h3 className="text-lg font-semibold">Write a Review</h3>
+          <h3 className="font-semibold text-zinc-900 dark:text-white">Write a review</h3>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Select Your Booking
+            <label className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-zinc-100">
+              Your booking
             </label>
             <Select value={bookingId} onValueChange={setBookingId}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="h-11 w-full rounded-lg border-zinc-200 dark:border-zinc-800">
                 <SelectValue placeholder="Select a completed booking" />
               </SelectTrigger>
               <SelectContent>
                 {userBookings.map((booking) => (
                   <SelectItem key={booking.id} value={booking.id}>
-                    Booking on{" "}
-                    {new Date(booking.bookingDateTime).toLocaleDateString()}
+                    Booking on {new Date(booking.bookingDateTime).toLocaleDateString()}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {userBookings.length === 0 && (
-              <p className="text-sm text-red-500 mt-1">
-                You need a completed booking to leave a review
+              <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                You can review this tour after a completed booking.
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Rating</label>
-            <div className="flex gap-2">
+            <p className="mb-1.5 text-sm font-medium text-zinc-900 dark:text-zinc-100">Rating</p>
+            <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   type="button"
                   onClick={() => setRating(star)}
-                  className="focus:outline-none"
+                  aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                  className="rounded p-0.5"
                 >
                   <Star
-                    size={24}
+                    size={22}
                     className={
                       star <= rating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-zinc-300 dark:text-zinc-700"
                     }
                   />
                 </button>
@@ -244,13 +253,19 @@ export default function TourReviews({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Comment</label>
+            <label
+              htmlFor="review-comment"
+              className="mb-1.5 block text-sm font-medium text-zinc-900 dark:text-zinc-100"
+            >
+              Comment
+            </label>
             <textarea
+              id="review-comment"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Share your experience..."
+              placeholder="What was the highlight of your tour?"
               rows={4}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900"
+              className="w-full rounded-lg border border-zinc-200 bg-white px-3.5 py-3 text-sm text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-900 focus:ring-4 focus:ring-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:focus:border-zinc-400"
               required
             />
           </div>
@@ -258,15 +273,15 @@ export default function TourReviews({
           <button
             type="submit"
             disabled={submitting}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold disabled:opacity-50 flex items-center gap-2"
+            className="flex h-10 items-center gap-2 rounded-lg bg-zinc-900 px-5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
           >
             {submitting ? (
               <>
-                <Spinner size="sm" className="border-white" />
-                Submitting...
+                <Spinner size="sm" />
+                Submitting…
               </>
             ) : (
-              "Submit Review"
+              "Submit review"
             )}
           </button>
         </form>

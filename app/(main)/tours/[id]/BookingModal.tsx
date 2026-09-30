@@ -1,6 +1,14 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import {
+  dialogClass,
+  iconButtonClass,
+  inputClass,
+  labelClass,
+  primaryButtonClass,
+} from "@/components/Auth/authStyles";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { X } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
@@ -65,65 +73,87 @@ export default function BookingModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="w-[95vw] max-w-xl max-h-[90vh] overflow-y-auto bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl">
-        <div className="flex justify-between items-center mb-4">
-          <DialogTitle className="text-2xl font-bold">Book Tour</DialogTitle>
-          <button onClick={() => setOpen(false)}>
-            <X className="text-zinc-500 hover:text-red-500" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">
-                Select Date
-              </label>
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md border w-full [&>*]:w-full"
-                disabled={(date) => date <= new Date()}
-              />
+      <DialogContent
+        showCloseButton={false}
+        className={`${dialogClass} max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl`}
+      >
+        <div className="p-6 sm:p-8">
+          <div className="flex items-start justify-between">
+            <div>
+              <DialogTitle className="text-xl font-semibold text-zinc-900 dark:text-white">
+                Request a booking
+              </DialogTitle>
+              <DialogDescription className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                Pick a date and time. Your guide will confirm it.
+              </DialogDescription>
             </div>
-
-            <div className="flex-1 flex flex-col gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Select Time
-                </label>
-                <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="w-full p-3 border rounded-lg dark:bg-zinc-900"
-                  required
-                />
-              </div>
-
-              <div className="flex-1">
-                <label className="text-sm font-medium mb-2 block">
-                  Message (Optional)
-                </label>
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Any special requests or questions..."
-                  className="w-full p-3 border rounded-lg dark:bg-zinc-900 h-32 sm:h-[calc(100%-2rem)]"
-                />
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close"
+              className={`${iconButtonClass} -mr-2 -mt-1`}
+            >
+              <X size={18} />
+            </button>
           </div>
 
-          <button
-            type="submit"
-            disabled={!date || loading}
-            className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition font-semibold disabled:opacity-50"
-          >
-            {loading ? "Booking..." : "Confirm Booking"}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+            <div className="flex flex-col gap-5 sm:flex-row">
+              <div className="flex-1">
+                <p className={labelClass}>Date</p>
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="mt-1.5 w-full rounded-lg border border-zinc-200 dark:border-zinc-800 [&>*]:w-full"
+                  disabled={(date) => date <= new Date()}
+                />
+              </div>
+
+              <div className="flex flex-1 flex-col gap-5">
+                <div>
+                  <label htmlFor="booking-time" className={labelClass}>
+                    Time
+                  </label>
+                  <input
+                    id="booking-time"
+                    type="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    className={inputClass}
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-1 flex-col">
+                  <label htmlFor="booking-message" className={labelClass}>
+                    Message <span className="font-normal text-zinc-400">(optional)</span>
+                  </label>
+                  <textarea
+                    id="booking-message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Any special requests or questions…"
+                    className={cn(inputClass, "h-32 flex-1 resize-none py-3")}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 border-t border-zinc-200 pt-5 dark:border-zinc-800">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                {date ? `${format(date, "EEE, d MMM yyyy")} at ${time}` : "No date selected"}
+              </p>
+              <button
+                type="submit"
+                disabled={!date || loading}
+                className={cn(primaryButtonClass, "w-auto shrink-0 px-6")}
+              >
+                {loading ? "Sending…" : "Send request"}
+              </button>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

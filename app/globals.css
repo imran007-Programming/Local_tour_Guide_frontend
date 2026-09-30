@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-family-poppins: var(--font-poppins);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   /* ── Brand color: Indigo (replaces red across the whole site) ── */
   --color-red-50:  oklch(0.962 0.018 272.314);
@@ -156,6 +156,27 @@
 
   button {
     cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Shared building blocks for the public site */
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .eyebrow {
+    @apply text-xs font-medium uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400;
+  }
+
+  .section-title {
+    @apply text-3xl font-semibold text-zinc-900 sm:text-4xl dark:text-white;
   }
 }
 

@@ -30,16 +30,12 @@ export async function authFetch(
 
         if (accessToken) {
             headers.Authorization = `Bearer ${accessToken}`;
-        }
-    } else {
-        // Client-side: Use server action to get httpOnly cookie
-        const { getAccessToken } = await import("@/app/actions/getAccessToken");
-        const accessToken = await getAccessToken();
-        
-        if (accessToken) {
-            headers.Authorization = `Bearer ${accessToken}`;
+            // CloudFront strips Authorization; the backend also reads this cookie
+            headers.Cookie = `accessToken=${accessToken}`;
         }
     }
+    // In the browser, requests go through the /api/backend rewrite, which
+    // forwards the httpOnly auth cookies, so no token lookup is needed.
 
     const resolvedUrl = isServer ? url : url.replace(BASE_URL, CLIENT_BASE_URL);
 

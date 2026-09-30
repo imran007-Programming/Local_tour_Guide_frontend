@@ -129,7 +129,8 @@ function ToursExploreContent() {
     setCurrentPage(1);
   };
 
-  const FilterPanel = () => (
+  // Plain JSX (not a nested component) so inputs keep focus between renders
+  const filterPanel = (
     <div className="space-y-6">
       {/* Search */}
       <div>
@@ -274,7 +275,7 @@ function ToursExploreContent() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#070A13] pt-28 pb-16">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#070A13] pt-10 pb-16">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
         {/* Page Header */}
         <div className="mb-8">
@@ -291,7 +292,7 @@ function ToursExploreContent() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-[280px] shrink-0">
-            <div className="sticky top-28 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5">
+            <div className="sticky top-24 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-sm font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
                   <SlidersHorizontal size={16} />
@@ -301,7 +302,7 @@ function ToursExploreContent() {
                   <span className="w-2 h-2 rounded-full bg-red-500" />
                 )}
               </div>
-              <FilterPanel />
+              {filterPanel}
             </div>
           </aside>
 
@@ -338,7 +339,7 @@ function ToursExploreContent() {
                     <X size={20} />
                   </button>
                 </div>
-                <FilterPanel />
+                {filterPanel}
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
                   className="w-full mt-6 px-4 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition"

@@ -10,11 +10,13 @@ import { BASE_URL } from "@/lib/config";
 interface BookingButtonProps {
   userRole?: string;
   tourId: string;
+  className?: string;
 }
 
 export default function BookingButton({
   userRole: initialUserRole,
   tourId,
+  className = "",
 }: BookingButtonProps) {
   const [signInOpen, setSignInOpen] = useState(false);
   const [signUpOpen, setSignUpOpen] = useState(false);
@@ -42,9 +44,9 @@ export default function BookingButton({
     <>
       <button
         onClick={handleBooking}
-        className="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 px-6 rounded-lg hover:from-red-700 hover:to-red-600 transition-all font-semibold text-sm lg:w-full lg:text-base"
+        className={`h-11 shrink-0 rounded-lg bg-zinc-900 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 ${className}`}
       >
-        Book Now
+        Book now
       </button>
 
       <BookingModal

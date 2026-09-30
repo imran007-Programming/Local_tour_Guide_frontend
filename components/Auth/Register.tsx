@@ -1,13 +1,22 @@
 "use client";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
-import { X, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { X, Eye, EyeOff, MapPin, ArrowRight, Compass, Backpack } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { RegisterFormValues, registerSchema } from "./ValidationSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BASE_URL } from "@/lib/config";
 import { toast } from "sonner";
 import Spinner from "../ui/spinner";
+import {
+  dialogClass,
+  errorClass,
+  iconButtonClass,
+  inputClass,
+  labelClass,
+  primaryButtonClass,
+  textLinkClass,
+} from "./authStyles";
 
 interface RegisterModalProps {
   open: boolean;
@@ -17,6 +26,50 @@ interface RegisterModalProps {
   hideRoleSelector?: boolean;
 }
 
+function PasswordField({
+  id,
+  label,
+  error,
+  autoComplete,
+  inputProps,
+}: {
+  id: string;
+  label: string;
+  error?: string;
+  autoComplete: string;
+  inputProps: React.InputHTMLAttributes<HTMLInputElement>;
+}) {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div>
+      <label htmlFor={id} className={labelClass}>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          id={id}
+          {...inputProps}
+          type={show ? "text" : "password"}
+          autoComplete={autoComplete}
+          placeholder="••••••••"
+          aria-invalid={!!error}
+          className={`${inputClass} pr-11`}
+        />
+        <button
+          type="button"
+          onClick={() => setShow(!show)}
+          aria-label={show ? "Hide password" : "Show password"}
+          className="absolute right-1.5 top-[calc(50%+3px)] flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+        >
+          {show ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+      </div>
+      {error && <p className={errorClass}>{error}</p>}
+    </div>
+  );
+}
+
 export default function RegisterModal({
   open,
   setOpen,
@@ -24,8 +77,7 @@ export default function RegisterModal({
   defaultRole = "TOURIST",
   hideRoleSelector = false,
 }: RegisterModalProps) {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+  const isGuide = defaultRole === "GUIDE";
 
   const {
     register,
@@ -66,242 +118,131 @@ export default function RegisterModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
-        className="
-        sm:max-w-lg
-        max-h-screen overflow-y-auto
-        bg-white dark:bg-zinc-950
-        border border-zinc-200 dark:border-zinc-800
-        p-8 rounded-xl
-
-        data-[state=open]:animate-in
-        data-[state=closed]:animate-out
-        data-[state=open]:slide-in-from-top-16
-        data-[state=closed]:slide-out-to-top-16
-        duration-500
-        "
+        showCloseButton={false}
+        className={`${dialogClass} max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-[440px]`}
       >
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <DialogTitle className="text-2xl font-bold text-zinc-900 dark:text-white">
-            Sign Up
-          </DialogTitle>
-          <button onClick={() => setOpen(false)}>
-            <X className="text-zinc-500 hover:text-red-500" />
-          </button>
-        </div>
-
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-800 pb-4">
-          Create your DreamsTour Account
-        </p>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-2 space-y-2">
-          {/* Name and Email - Side by Side */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Name */}
-            <div>
-              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Name
-              </label>
-              <div className="relative mt-2">
-                <User
-                  className="absolute left-3 top-3.5 text-zinc-400"
-                  size={18}
-                />
-                <input
-                  {...register("name")}
-                  type="text"
-                  placeholder="Enter Full Name"
-                  className="w-full pl-10 pr-4 py-3 rounded-md border
-                  border-zinc-300 dark:border-zinc-700
-                  bg-white dark:bg-zinc-900
-                  text-zinc-900 dark:text-white
-                  focus:ring-2 focus:ring-red-500 outline-none"
-                />
-              </div>
-              {errors.name && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Email
-              </label>
-              <div className="relative mt-2">
-                <Mail
-                  className="absolute left-3 top-3.5 text-zinc-400"
-                  size={18}
-                />
-                <input
-                  {...register("email")}
-                  type="email"
-                  placeholder="Enter Email"
-                  className="w-full pl-10 pr-4 py-3 rounded-md border
-                  border-zinc-300 dark:border-zinc-700
-                  bg-white dark:bg-zinc-900
-                  text-zinc-900 dark:text-white
-                  focus:ring-2 focus:ring-red-500 outline-none"
-                />
-              </div>
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
+        <div className="p-6 sm:p-8">
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 dark:bg-white">
+              <MapPin className="h-5 w-5 text-white dark:text-zinc-900" />
+            </span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close"
+              className={`${iconButtonClass} -mr-2 -mt-2`}
+            >
+              <X size={18} />
+            </button>
           </div>
 
-          {/* Role Selection - Hidden when hideRoleSelector is true */}
+          <DialogTitle className="mt-5 text-xl font-semibold text-zinc-900 dark:text-white">
+            {isGuide ? "Become a guide" : "Create your account"}
+          </DialogTitle>
+          <DialogDescription className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            {isGuide
+              ? "Share your city with travellers and earn from your tours."
+              : "Book tours with verified local guides."}
+          </DialogDescription>
+
           {!hideRoleSelector && (
-            <div className="mt-4">
-              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Register As: {defaultRole === "GUIDE" ? "Guide" : "Tourist"}
-              </label>
-              <div className="mt-2 px-4 py-3 rounded-md border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-white">
-                {defaultRole === "GUIDE" ? "Guide" : "Tourist"}
-              </div>
+            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-zinc-200 px-3 py-1 text-xs font-medium text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
+              {isGuide ? <Compass size={13} /> : <Backpack size={13} />}
+              Signing up as {isGuide ? "a guide" : "a traveller"}
             </div>
           )}
 
-          {/* Password and Confirm Password - Side by Side */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Password */}
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
             <div>
-              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Password
+              <label htmlFor="register-name" className={labelClass}>
+                Full name
               </label>
-              <div className="relative mt-2">
-                <Lock
-                  className="absolute left-3 top-3.5 text-zinc-400"
-                  size={18}
-                />
-                <input
-                  {...register("password")}
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter Password"
-                  className="w-full pl-10 pr-10 py-3 rounded-md border
-                  border-zinc-300 dark:border-zinc-700
-                  bg-white dark:bg-zinc-900
-                  text-zinc-900 dark:text-white
-                  focus:ring-2 focus:ring-red-500 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3.5 text-zinc-400"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.password.message}
-                </p>
-              )}
+              <input
+                id="register-name"
+                {...register("name")}
+                type="text"
+                autoComplete="name"
+                placeholder="Jane Doe"
+                aria-invalid={!!errors.name}
+                className={inputClass}
+              />
+              {errors.name && <p className={errorClass}>{errors.name.message}</p>}
             </div>
 
-            {/* Confirm Password */}
             <div>
-              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Confirm Password
+              <label htmlFor="register-email" className={labelClass}>
+                Email
               </label>
-              <div className="relative mt-2">
-                <Lock
-                  className="absolute left-3 top-3.5 text-zinc-400"
-                  size={18}
-                />
-                <input
-                  {...register("confirmPassword")}
-                  type={showConfirm ? "text" : "password"}
-                  placeholder="Enter Password"
-                  className="w-full pl-10 pr-10 py-3 rounded-md border
-                  border-zinc-300 dark:border-zinc-700
-                  bg-white dark:bg-zinc-900
-                  text-zinc-900 dark:text-white
-                  focus:ring-2 focus:ring-red-500 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-3.5 text-zinc-400"
-                >
-                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
+              <input
+                id="register-email"
+                {...register("email")}
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                aria-invalid={!!errors.email}
+                className={inputClass}
+              />
+              {errors.email && <p className={errorClass}>{errors.email.message}</p>}
             </div>
-          </div>
 
-          {/* Terms */}
-          <div className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-400">
-            <input type="checkbox" />
-            <span>
-              I agree with the{" "}
-              <span className="text-red-500 cursor-pointer">
-                Terms Of Service.
+            <div className="grid gap-4 sm:grid-cols-2">
+              <PasswordField
+                id="register-password"
+                label="Password"
+                autoComplete="new-password"
+                error={errors.password?.message}
+                inputProps={register("password")}
+              />
+              <PasswordField
+                id="register-confirm"
+                label="Confirm password"
+                autoComplete="new-password"
+                error={errors.confirmPassword?.message}
+                inputProps={register("confirmPassword")}
+              />
+            </div>
+
+            <label className="flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-zinc-900 dark:accent-white"
+              />
+              <span>
+                I agree to the <span className="font-medium text-zinc-900 dark:text-white">Terms of Service</span>
               </span>
-            </span>
-          </div>
+            </label>
 
-          {/* Register Button */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <Spinner size="sm" className="border-white" />
-                Creating...
-              </>
-            ) : (
-              "Register →"
-            )}
-          </button>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4 text-zinc-400 text-sm">
-            <div className="flex-1 h-px bg-zinc-300 dark:bg-zinc-800" />
-            Or
-            <div className="flex-1 h-px bg-zinc-300 dark:bg-zinc-800" />
-          </div>
-
-          {/* Social Buttons */}
-          <div className="flex gap-4">
-            <button
-              type="button"
-              className="flex-1 bg-zinc-100 dark:bg-zinc-800 py-3 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
-            >
-              Google
+            <button type="submit" disabled={isSubmitting} className={primaryButtonClass}>
+              {isSubmitting ? (
+                <>
+                  <Spinner size="sm" />
+                  Creating account…
+                </>
+              ) : (
+                <>
+                  Create account
+                  <ArrowRight size={15} />
+                </>
+              )}
             </button>
-            <button
-              type="button"
-              className="flex-1 bg-zinc-100 dark:bg-zinc-800 py-3 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition"
-            >
-              Facebook
-            </button>
-          </div>
+          </form>
 
-          {/* Switch */}
-          <div
-            onClick={() => {
-              setLoginOpen(true);
-              setOpen(false);
-            }}
-            className="text-center text-sm text-zinc-600 dark:text-zinc-400"
-          >
+          <p className="mt-5 text-center text-sm text-zinc-500 dark:text-zinc-400">
             Already have an account?{" "}
-            <span className="text-red-500 cursor-pointer">Sign In</span>
-          </div>
-        </form>
+            <button
+              type="button"
+              onClick={() => {
+                setLoginOpen(true);
+                setOpen(false);
+              }}
+              className={textLinkClass}
+            >
+              Sign in
+            </button>
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );

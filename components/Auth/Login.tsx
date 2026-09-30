@@ -1,8 +1,9 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { X, Eye, EyeOff } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { X, Eye, EyeOff, MapPin, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
 import { useForm } from "react-hook-form";
@@ -12,7 +13,17 @@ import { Spinner } from "../ui/spinner";
 import { BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
 import { loginAction } from "@/app/actions/loginAction";
-import { AnimatePresence, motion } from "framer-motion";
+import { notifyAuthChanged } from "@/hooks/useCurrentUser";
+import { motion } from "framer-motion";
+import {
+  dialogClass,
+  errorClass,
+  iconButtonClass,
+  inputClass,
+  labelClass,
+  primaryButtonClass,
+  textLinkClass,
+} from "./authStyles";
 
 interface SignInModalProps {
   open: boolean;
@@ -20,6 +31,12 @@ interface SignInModalProps {
   setRegisterOpen: (open: boolean) => void;
   onSuccess?: () => void;
 }
+
+const demoAccounts = [
+  { label: "Admin", email: "admin@gmail.com", password: "52535455" },
+  { label: "Guide", email: "guide@gmail.com", password: "123456" },
+  { label: "Tourist", email: "tourist@gmail.com", password: "123456" },
+];
 
 export default function SignInModal({
   open,
@@ -64,6 +81,7 @@ export default function SignInModal({
 
       if (result.data?.accessToken && result.data?.refreshToken) {
         await loginAction(result.data.accessToken, result.data.refreshToken);
+        notifyAuthChanged();
       }
 
       toast.success("Login successful!");
@@ -71,12 +89,12 @@ export default function SignInModal({
 
       if (onSuccess) {
         onSuccess();
-        console.log("call on success");
       } else {
         setIsRedirecting(true);
-        setTimeout(() => setIsRedirecting(false), 8000);
-        router.push("/dashboard");
-        router.refresh();
+        setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh();
+        }, 1000);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -87,224 +105,152 @@ export default function SignInModal({
     }
   };
 
+  const busy = isLoading || isSubmitting;
+
   return (
     <>
-      {/* Full-screen redirect spinner overlay */}
-      <AnimatePresence>
-        {isRedirecting && (
+      {/* Full-screen redirect overlay. Portalled to <body> because an ancestor
+          with backdrop-filter (the navbar) would otherwise trap `position: fixed`. */}
+      {isRedirecting &&
+        createPortal(
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-3 bg-white dark:bg-zinc-950"
           >
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
-              className="flex flex-col items-center gap-4"
-            >
-              {/* Animated spinner ring */}
-              <div className="relative">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 1.2,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                  className="w-14 h-14 rounded-full border-4 border-red-200 dark:border-red-900 border-t-red-500 dark:border-t-red-400"
-                />
-                <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{
-                    duration: 1.8,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                  className="absolute inset-1 w-10 h-10 rounded-full border-4 border-transparent border-b-red-400 dark:border-b-red-300"
-                />
-              </div>
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.3 }}
-                className="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-              >
-                Taking you to your dashboard...
-              </motion.p>
-            </motion.div>
-          </motion.div>
+            <Spinner size="md" className="text-zinc-900 dark:text-white" />
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">Taking you to your dashboard…</p>
+          </motion.div>,
+          document.body,
         )}
-      </AnimatePresence>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent
-          className="
-        sm:max-w-md
-        bg-white dark:bg-zinc-900
-        border border-zinc-200 dark:border-zinc-800
-        p-8 rounded-xl
-
-        data-[state=open]:animate-in
-        data-[state=closed]:animate-out
-        data-[state=closed]:fade-out-0
-        data-[state=open]:fade-in-0
-        data-[state=closed]:slide-out-to-top-10
-        data-[state=open]:slide-in-from-top-10
-        duration-500
-        "
-        >
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-2xl cursor-pointer font-bold text-zinc-900 dark:text-white">
-              Sign In
-            </DialogTitle>
-            <button onClick={() => setOpen(false)} className="cursor-pointer">
-              <X className="cursor-pointer" />
-            </button>
-          </div>
-
-          <p className="mt-2 text-sm text-center text-zinc-600 dark:text-zinc-400">
-            Sign in to start managing your DreamsTour account
-          </p>
-
-          {/* FORM */}
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-            {/* Email */}
-            <div>
-              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Email
-              </label>
-              <input
-                {...register("email")}
-                type="email"
-                placeholder="Enter Email"
-                className="mt-2 w-full px-4 py-3 rounded-md border
-              border-zinc-300 dark:border-zinc-700
-              bg-white dark:bg-zinc-800
-              text-zinc-900 dark:text-white
-              focus:ring-2 focus:ring-red-500 outline-none"
-              />
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.email.message}
-                </p>
-              )}
+        <DialogContent showCloseButton={false} className={`${dialogClass} sm:max-w-100`}>
+          <div className="p-6 sm:p-8">
+            {/* Header */}
+            <div className="flex items-start justify-between">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 dark:bg-white">
+                <MapPin className="h-5 w-5 text-white dark:text-zinc-900" />
+              </span>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+                className={`${iconButtonClass} -mr-2 -mt-2`}
+              >
+                <X size={18} />
+              </button>
             </div>
 
-            {/* Password */}
-            {/* Password */}
-            <div>
-              <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-                Password
-              </label>
+            <DialogTitle className="mt-5 text-xl font-semibold text-zinc-900 dark:text-white">
+              Welcome back
+            </DialogTitle>
+            <DialogDescription className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              Sign in to your TourGuide account.
+            </DialogDescription>
 
-              <div className="relative mt-2">
+            {/* Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
+              <div>
+                <label htmlFor="login-email" className={labelClass}>
+                  Email
+                </label>
                 <input
-                  {...register("password")}
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter Password"
-                  className="w-full px-4 pr-10 py-3 rounded-md border
-      border-zinc-300 dark:border-zinc-700
-      bg-white dark:bg-zinc-800
-      text-zinc-900 dark:text-white
-      focus:ring-2 focus:ring-red-500 outline-none"
+                  id="login-email"
+                  {...register("email")}
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  aria-invalid={!!errors.email}
+                  className={inputClass}
                 />
-
-                {/* Eye Button */}
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400 hover:text-red-500 cursor-pointer"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                {errors.email && <p className={errorClass}>{errors.email.message}</p>}
               </div>
 
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
+              <div>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="login-password" className={labelClass}>
+                    Password
+                  </label>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">Forgot password?</span>
+                </div>
+                <div className="relative">
+                  <input
+                    id="login-password"
+                    {...register("password")}
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    aria-invalid={!!errors.password}
+                    className={`${inputClass} pr-11`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-1.5 top-[calc(50%+3px)] flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {errors.password && <p className={errorClass}>{errors.password.message}</p>}
+              </div>
 
-            {/* Remember Me */}
-            <div className="flex justify-between items-center text-sm">
-              <label className="flex items-center gap-2 text-zinc-700 dark:text-zinc-400">
-                <input type="checkbox" {...register("remember")} />
-                Remember Me
+              <label className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                <input
+                  type="checkbox"
+                  {...register("remember")}
+                  className="h-4 w-4 rounded border-zinc-300 accent-zinc-900 dark:accent-white"
+                />
+                Remember me
               </label>
-              <span className="text-red-500 cursor-pointer">
-                Forgot Password?
-              </span>
-            </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={isLoading || isSubmitting}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              {isLoading ? (
-                <>
-                  <Spinner size="sm" className="border-white" />
-                  Logging in...
-                </>
-              ) : (
-                "Login →"
-              )}
-            </button>
+              <button type="submit" disabled={busy} className={primaryButtonClass}>
+                {isLoading ? (
+                  <>
+                    <Spinner size="sm" />
+                    Signing in…
+                  </>
+                ) : (
+                  <>
+                    Sign in
+                    <ArrowRight size={15} />
+                  </>
+                )}
+              </button>
+            </form>
 
-            {/* Switch to Register */}
-            <div
-              onClick={() => {
-                setRegisterOpen(true);
-                setOpen(false);
-              }}
-              className="text-center text-sm text-zinc-600 dark:text-zinc-400 cursor-pointer"
-            >
+            <p className="mt-5 text-center text-sm text-zinc-500 dark:text-zinc-400">
               Don’t have an account?{" "}
-              <span className="text-red-500 cursor-pointer">Sign up</span>
-            </div>
-          </form>
-
-          {/* Quick Login Buttons */}
-          <div className="pt-4 border-t dark:border-zinc-700">
-            <p className="text-xs text-center text-zinc-500 dark:text-zinc-400 mb-3">
-              Quick Login (Demo)
+              <button
+                type="button"
+                onClick={() => {
+                  setRegisterOpen(true);
+                  setOpen(false);
+                }}
+                className={textLinkClass}
+              >
+                Sign up
+              </button>
             </p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() =>
-                  onSubmit({ email: "admin@gmail.com", password: "52535455" })
-                }
-                className="px-3 py-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-800 transition cursor-pointer disabled:opacity-50"
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() =>
-                  onSubmit({ email: "guide@gmail.com", password: "123456" })
-                }
-                className="px-3 py-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition cursor-pointer disabled:opacity-50"
-              >
-                Guide
-              </button>
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() =>
-                  onSubmit({ email: "tourist@gmail.com", password: "123456" })
-                }
-                className="px-3 py-2 text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-lg hover:bg-green-200 dark:hover:bg-green-800 transition cursor-pointer disabled:opacity-50"
-              >
-                Tourist
-              </button>
+          </div>
+
+          {/* Demo logins */}
+          <div className="rounded-b-2xl border-t border-zinc-200 bg-zinc-50 px-6 py-4 sm:px-8 dark:border-zinc-800 dark:bg-zinc-900/50">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">Quick demo login</p>
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {demoAccounts.map((acc) => (
+                <button
+                  key={acc.label}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => onSubmit({ email: acc.email, password: acc.password })}
+                  className="h-9 rounded-md border border-zinc-200 bg-white text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:text-white"
+                >
+                  {acc.label}
+                </button>
+              ))}
             </div>
           </div>
         </DialogContent>
