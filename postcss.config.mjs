@@ -1,11 +1,9 @@
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-
 const config = {
   plugins: {
-    // Resolve `@import "tailwindcss"` from this project, not from whatever
-    // directory the dev server happened to be launched in.
-    "@tailwindcss/postcss": { base: dirname(fileURLToPath(import.meta.url)) },
+    // Scan for classes from the project root. Don't derive this from
+    // import.meta.url: Turbopack bundles this file into .next/, so that would
+    // point Tailwind at the build folder and no utility classes get generated.
+    "@tailwindcss/postcss": { base: process.cwd() },
   },
 };
 
