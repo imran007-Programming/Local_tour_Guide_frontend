@@ -195,6 +195,7 @@ export default function TourPageContent({
                 fill
                 priority={i === 0}
                 sizes="(max-width: 1152px) 100vw, 1152px"
+                quality={90}
                 className="-z-20 object-cover transition-opacity duration-700"
                 style={{ opacity: i === activeImage ? 1 : 0 }}
               />
@@ -546,6 +547,7 @@ export default function TourPageContent({
                   alt={`${tour.title} photo ${i + 1}`}
                   fill
                   sizes="(max-width: 896px) 100vw, 896px"
+                  quality={90}
                   className="object-cover"
                 />
               </div>

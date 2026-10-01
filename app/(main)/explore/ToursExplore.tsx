@@ -12,7 +12,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import BookingPagination from "@/app/dashboard/bookings/BookingsPagination";
-import TourCard from "./TourCard";
+import { TourCard } from "@/components/home/FeaturedTours";
+import SectionHeading from "@/components/home/SectionHeading";
 import Spinner from "@/components/ui/spinner";
 import {
   Select,
@@ -141,30 +142,30 @@ function ToursExploreContent() {
     <div className="space-y-6">
       {/* Search */}
       <div>
-        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+        <label className="mb-2 block text-sm font-semibold text-slate-950 dark:text-white">
           Search
         </label>
         <div className="relative">
           <Search
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
           />
           <input
             placeholder="Search tours..."
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100 transition"
+            className="field-soft pl-10"
           />
         </div>
       </div>
 
       {/* Category */}
       <div>
-        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+        <label className="mb-2 block text-sm font-semibold text-slate-950 dark:text-white">
           Category
         </label>
         <Select value={category} onValueChange={(v) => { setCategory(v); setCurrentPage(1); }}>
-          <SelectTrigger className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 h-10">
+          <SelectTrigger className="h-12 w-full rounded-xl border-0 bg-slate-100 shadow-none dark:bg-zinc-800/70">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
@@ -180,26 +181,26 @@ function ToursExploreContent() {
 
       {/* City */}
       <div>
-        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+        <label className="mb-2 block text-sm font-semibold text-slate-950 dark:text-white">
           City
         </label>
         <div className="relative">
           <MapPin
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
           />
           <input
             placeholder="Any city"
             value={city}
             onChange={(e) => { setCity(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100 transition"
+            className="field-soft pl-10"
           />
         </div>
       </div>
 
       {/* Price Range */}
       <div>
-        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+        <label className="mb-2 block text-sm font-semibold text-slate-950 dark:text-white">
           Price Range
         </label>
         <div className="flex items-center justify-between text-sm text-zinc-600 dark:text-zinc-400 mb-3">
@@ -222,7 +223,7 @@ function ToursExploreContent() {
 
       {/* Guests */}
       <div>
-        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+        <label className="mb-2 block text-sm font-semibold text-slate-950 dark:text-white">
           Guests
         </label>
         <input
@@ -231,17 +232,17 @@ function ToursExploreContent() {
           min={1}
           value={guest}
           onChange={(e) => { setGuest(e.target.value); setCurrentPage(1); }}
-          className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100 transition"
+          className="field-soft"
         />
       </div>
 
       {/* Duration */}
       <div>
-        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+        <label className="mb-2 block text-sm font-semibold text-slate-950 dark:text-white">
           Duration
         </label>
         <Select value={duration} onValueChange={(v) => { setDuration(v); setCurrentPage(1); }}>
-          <SelectTrigger className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 h-10">
+          <SelectTrigger className="h-12 w-full rounded-xl border-0 bg-slate-100 shadow-none dark:bg-zinc-800/70">
             <SelectValue placeholder="Any length" />
           </SelectTrigger>
           <SelectContent>
@@ -257,11 +258,11 @@ function ToursExploreContent() {
       {/* Sort */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+          <label className="mb-2 block text-sm font-semibold text-slate-950 dark:text-white">
             Sort By
           </label>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 h-10 text-xs">
+            <SelectTrigger className="h-12 w-full rounded-xl border-0 bg-slate-100 text-xs shadow-none dark:bg-zinc-800/70">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -272,11 +273,11 @@ function ToursExploreContent() {
           </Select>
         </div>
         <div>
-          <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+          <label className="mb-2 block text-sm font-semibold text-slate-950 dark:text-white">
             Order
           </label>
           <Select value={sortOrder} onValueChange={setSortOrder}>
-            <SelectTrigger className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 h-10 text-xs">
+            <SelectTrigger className="h-12 w-full rounded-xl border-0 bg-slate-100 text-xs shadow-none dark:bg-zinc-800/70">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -291,7 +292,7 @@ function ToursExploreContent() {
       {hasActiveFilters && (
         <button
           onClick={resetFilters}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 rounded-xl transition"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-blue-500/15 dark:hover:text-blue-400"
         >
           <X size={14} />
           Clear all filters
@@ -301,31 +302,34 @@ function ToursExploreContent() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#070A13] pt-10 pb-16">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+    <div className="min-h-screen bg-white pb-20 pt-6 md:pb-28 dark:bg-zinc-950">
+      <div className="container-page max-w-7xl">
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white">
-            Explore Tours
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            {totalCount > 0
-              ? `${totalCount} tour${totalCount > 1 ? "s" : ""} available`
-              : "Find your perfect tour experience"}
-          </p>
+        <div className="mb-10">
+          <SectionHeading
+            watermark="Explore"
+            title="Explore Tours"
+            subtitle={
+              totalCount > 0
+                ? `${totalCount} tour${totalCount > 1 ? "s" : ""} from local guides — small groups, local insight and fair prices.`
+                : "Find your perfect tour experience with a local guide."
+            }
+          />
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col gap-8 lg:flex-row">
           {/* Desktop Sidebar */}
-          <aside className="hidden lg:block w-[280px] shrink-0">
-            <div className="sticky top-24 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-sm font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
-                  <SlidersHorizontal size={16} />
+          <aside className="hidden w-72.5 shrink-0 lg:block">
+            <div className="sticky top-24 rounded-3xl border border-slate-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="flex items-center gap-2 text-base font-semibold text-slate-950 dark:text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400">
+                    <SlidersHorizontal size={15} />
+                  </span>
                   Filters
                 </h2>
                 {hasActiveFilters && (
-                  <span className="w-2 h-2 rounded-full bg-red-500" />
+                  <span className="h-2 w-2 rounded-full bg-blue-500" />
                 )}
               </div>
               {filterPanel}
@@ -336,12 +340,12 @@ function ToursExploreContent() {
           <div className="lg:hidden">
             <button
               onClick={() => setMobileFiltersOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="btn-dark gap-2"
             >
               <SlidersHorizontal size={16} />
               Filters
               {hasActiveFilters && (
-                <span className="w-2 h-2 rounded-full bg-red-500" />
+                <span className="h-2 w-2 rounded-full bg-blue-500" />
               )}
             </button>
           </div>
@@ -353,7 +357,7 @@ function ToursExploreContent() {
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                 onClick={() => setMobileFiltersOpen(false)}
               />
-              <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-white dark:bg-zinc-900 rounded-t-3xl overflow-y-auto p-6">
+              <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-white p-6 dark:bg-zinc-900">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold text-zinc-900 dark:text-white">
                     Filters
@@ -368,7 +372,7 @@ function ToursExploreContent() {
                 {filterPanel}
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="w-full mt-6 px-4 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-xl transition"
+                  className="btn-pill mt-6 w-full justify-center py-3 pl-5 pr-5"
                 >
                   Show Results
                 </button>
@@ -379,36 +383,36 @@ function ToursExploreContent() {
           {/* Tours Grid */}
           <div className="flex-1 min-w-0">
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 {[...Array(9)].map((_, i) => (
                   <div
                     key={i}
-                    className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden"
+                    className="rounded-3xl border border-slate-200/80 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
                   >
-                    <div className="h-44 bg-zinc-200 dark:bg-zinc-700 animate-pulse" />
-                    <div className="p-4 space-y-3">
-                      <div className="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-3/4 animate-pulse" />
-                      <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-full animate-pulse" />
-                      <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-1/2 animate-pulse" />
+                    <div className="aspect-4/3 animate-pulse rounded-2xl bg-slate-100 dark:bg-zinc-800" />
+                    <div className="space-y-3 px-2 pb-2 pt-4">
+                      <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100 dark:bg-zinc-800" />
+                      <div className="h-3 w-full animate-pulse rounded bg-slate-100 dark:bg-zinc-800" />
+                      <div className="h-3 w-1/2 animate-pulse rounded bg-slate-100 dark:bg-zinc-800" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : tours.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
-                  <MapPin size={28} className="text-zinc-400" />
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-500/15">
+                  <MapPin size={28} className="text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="text-base font-medium text-zinc-900 dark:text-white">
+                <h3 className="text-lg font-semibold text-slate-950 dark:text-white">
                   No tours found
                 </h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                <p className="mt-1 text-[15px] text-slate-600 dark:text-zinc-400">
                   Try adjusting your filters
                 </p>
                 {hasActiveFilters && (
                   <button
                     onClick={resetFilters}
-                    className="mt-4 px-5 py-2 text-sm font-medium text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition"
+                    className="btn-dark mt-5"
                   >
                     Clear filters
                   </button>
@@ -416,9 +420,9 @@ function ToursExploreContent() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
-                  {tours.map((tour) => (
-                    <TourCard key={tour.id} tour={tour} />
+                <div className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  {tours.map((tour, i) => (
+                    <TourCard key={tour.id} tour={tour} index={i} />
                   ))}
                 </div>
 
