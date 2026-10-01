@@ -23,7 +23,7 @@ export default function GuideCard({
 
   return (
     <Link href={`/guides/${guideSlug(guide.name)}`} className="group block">
-      <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-900">
+      <div className="relative aspect-4/5 overflow-hidden rounded-3xl bg-slate-100 dark:bg-zinc-900">
         <Image
           src={imgSrc}
           alt={guide.name}
@@ -35,12 +35,12 @@ export default function GuideCard({
       </div>
 
       <div className="mt-4 flex items-start justify-between gap-3">
-        <h3 className="truncate font-medium capitalize text-zinc-900 dark:text-white">
+        <h3 className="truncate font-semibold capitalize text-slate-950 dark:text-white">
           {guide.name.trim()}
         </h3>
         {rating > 0 && (
           <span className="flex shrink-0 items-center gap-1 text-sm text-zinc-700 dark:text-zinc-300">
-            <Star size={13} className="fill-zinc-900 text-zinc-900 dark:fill-white dark:text-white" />
+            <Star size={14} className="fill-amber-400 text-amber-400" />
             {rating.toFixed(1)}
             {reviews > 0 && <span className="text-zinc-400">({reviews})</span>}
           </span>
@@ -71,7 +71,7 @@ export default function GuideCard({
 export function GuideCardSkeleton() {
   return (
     <div>
-      <div className="aspect-4/5 animate-pulse rounded-2xl bg-zinc-100 dark:bg-zinc-900" />
+      <div className="aspect-4/5 animate-pulse rounded-3xl bg-zinc-100 dark:bg-zinc-900" />
       <div className="mt-4 space-y-2">
         <div className="h-4 w-2/3 animate-pulse rounded bg-zinc-100 dark:bg-zinc-900" />
         <div className="h-3 w-1/2 animate-pulse rounded bg-zinc-100 dark:bg-zinc-900" />

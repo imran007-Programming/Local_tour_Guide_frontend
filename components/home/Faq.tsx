@@ -32,16 +32,19 @@ const faqs = [
 
 export default function Faq() {
   return (
-    <section className="border-t border-zinc-200 bg-white py-20 md:py-24 dark:border-zinc-900 dark:bg-zinc-950">
-      <div className="container-page grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+    <section className="bg-slate-100/70 py-20 md:py-28 dark:bg-zinc-900/40">
+      <div className="container-page grid gap-10 lg:grid-cols-[1fr_1.5fr] lg:gap-16">
         <div>
-          <p className="eyebrow">FAQ</p>
-          <h2 className="section-title mt-2">Questions, answered</h2>
-          <p className="mt-4 text-zinc-600 dark:text-zinc-400">
+          <h2 className="display-title text-5xl sm:text-6xl">
+            Questions,
+            <br />
+            answered
+          </h2>
+          <p className="mt-5 text-slate-600 dark:text-zinc-400">
             Can’t find what you’re looking for? Reach us at{" "}
             <a
               href="mailto:info@example.com"
-              className="font-medium text-zinc-900 underline underline-offset-4 dark:text-white"
+              className="font-medium text-blue-600 underline underline-offset-4 dark:text-blue-400"
             >
               info@example.com
             </a>
@@ -49,17 +52,17 @@ export default function Faq() {
           </p>
         </div>
 
-        <Accordion type="single" collapsible className="w-full border-t border-zinc-200 dark:border-zinc-800">
+        <Accordion type="single" collapsible className="w-full space-y-3">
           {faqs.map((item, i) => (
             <AccordionItem
               key={item.q}
               value={`item-${i}`}
-              className="border-b border-zinc-200 dark:border-zinc-800"
+              className="rounded-2xl border-0 bg-white px-6 last:border-b-0 data-[state=open]:shadow-lg data-[state=open]:shadow-slate-950/5 dark:bg-zinc-900"
             >
-              <AccordionTrigger className="py-5 text-left text-base font-medium text-zinc-900 hover:no-underline dark:text-white">
+              <AccordionTrigger className="py-5 text-left text-base font-semibold text-slate-950 hover:no-underline dark:text-white">
                 {item.q}
               </AccordionTrigger>
-              <AccordionContent className="pb-5 text-zinc-600 dark:text-zinc-400">
+              <AccordionContent className="pb-5 text-slate-600 dark:text-zinc-400">
                 {item.a}
               </AccordionContent>
             </AccordionItem>

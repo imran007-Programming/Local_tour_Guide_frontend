@@ -36,38 +36,42 @@ const socials = [
 
 export default function Footer() {
   return (
-    <footer className="border-t border-zinc-200 bg-white dark:border-zinc-900 dark:bg-zinc-950">
-      <div className="container-page grid gap-12 py-16 md:grid-cols-[1.5fr_repeat(3,1fr)]">
+    <footer className="bg-slate-950 text-white dark:border-t dark:border-zinc-900 dark:bg-black">
+      <div className="container-page grid gap-12 py-16 md:grid-cols-[1.6fr_repeat(3,1fr)]">
         <div className="max-w-xs">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 dark:bg-white">
-              <MapPin className="h-4 w-4 text-white dark:text-zinc-900" />
-            </span>
-            <span className="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-white">
-              TourGuide
-            </span>
+          <Link href="/" className="flex items-center gap-1.5">
+            <MapPin className="h-6 w-6 fill-white text-slate-950" strokeWidth={2.25} />
+            <span className="font-display text-xl uppercase tracking-wide">TourGuide</span>
           </Link>
-          <p className="mt-4 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
-            Authentic tours with verified local guides. Travel like a local, wherever you go.
+          <p className="mt-4 text-sm leading-relaxed text-slate-300">
+            Explore the world&apos;s hidden treasures, waiting to be discovered with local guides.
           </p>
-          <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">+1 56589 54598</p>
+          <p className="mt-4 text-sm text-slate-400">+1 56589 54598</p>
+          <div className="mt-6 flex gap-2">
+            {socials.map(({ Icon, label }) => (
+              <span
+                key={label}
+                aria-label={label}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-slate-300 transition-colors hover:bg-blue-500 hover:text-white"
+              >
+                <Icon size={16} strokeWidth={1.75} />
+              </span>
+            ))}
+          </div>
         </div>
 
         {columns.map((col) => (
           <div key={col.title}>
-            <h4 className="text-sm font-medium text-zinc-900 dark:text-white">{col.title}</h4>
-            <ul className="mt-4 space-y-3 text-sm">
+            <h4 className="text-sm font-semibold text-slate-400">{col.title}</h4>
+            <ul className="mt-5 space-y-3.5 text-sm">
               {col.items.map((item) => (
                 <li key={item.label}>
                   {item.href ? (
-                    <Link
-                      href={item.href}
-                      className="text-zinc-500 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                    >
+                    <Link href={item.href} className="text-white transition-colors hover:text-blue-400">
                       {item.label}
                     </Link>
                   ) : (
-                    <span className="text-zinc-500 dark:text-zinc-400">{item.label}</span>
+                    <span className="text-slate-200">{item.label}</span>
                   )}
                 </li>
               ))}
@@ -76,22 +80,13 @@ export default function Footer() {
         ))}
       </div>
 
-      <div className="border-t border-zinc-200 dark:border-zinc-900">
-        <div className="container-page flex flex-col items-center justify-between gap-4 py-6 sm:flex-row">
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            © {new Date().getFullYear()} TourGuide. All rights reserved.
-          </p>
-          <div className="flex gap-1">
-            {socials.map(({ Icon, label }) => (
-              <span
-                key={label}
-                aria-label={label}
-                className="flex h-9 w-9 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-white"
-              >
-                <Icon size={17} strokeWidth={1.75} />
-              </span>
-            ))}
-          </div>
+      <div className="container-page">
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 border-t border-white/15 py-7 text-sm text-slate-300">
+          <span>© {new Date().getFullYear()} TourGuide. All rights reserved.</span>
+          <span className="text-white/30">|</span>
+          <span>Privacy Policy</span>
+          <span className="text-white/30">|</span>
+          <span>Terms of Service</span>
         </div>
       </div>
     </footer>

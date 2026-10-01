@@ -6,19 +6,20 @@
 
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-anton), "Impact", ui-sans-serif, sans-serif;
 
-  /* ── Brand color: Indigo (replaces red across the whole site) ── */
-  --color-red-50:  oklch(0.962 0.018 272.314);
-  --color-red-100: oklch(0.930 0.034 272.788);
-  --color-red-200: oklch(0.870 0.065 274.039);
-  --color-red-300: oklch(0.785 0.115 274.713);
-  --color-red-400: oklch(0.673 0.182 276.935);
-  --color-red-500: oklch(0.585 0.233 277.117);
-  --color-red-600: oklch(0.511 0.262 276.966);
-  --color-red-700: oklch(0.457 0.240 277.023);
-  --color-red-800: oklch(0.398 0.195 277.366);
-  --color-red-900: oklch(0.359 0.144 278.697);
-  --color-red-950: oklch(0.257 0.090 281.288);
+  /* ── Brand color: Blue #3B82F6 / #2563EB (replaces red across the whole site) ── */
+  --color-red-50:  oklch(0.970 0.014 254.604);
+  --color-red-100: oklch(0.932 0.032 255.585);
+  --color-red-200: oklch(0.882 0.059 254.128);
+  --color-red-300: oklch(0.809 0.105 251.813);
+  --color-red-400: oklch(0.707 0.165 254.624);
+  --color-red-500: oklch(0.623 0.214 259.815);
+  --color-red-600: oklch(0.546 0.245 262.881);
+  --color-red-700: oklch(0.488 0.243 264.376);
+  --color-red-800: oklch(0.424 0.199 265.638);
+  --color-red-900: oklch(0.379 0.146 265.522);
+  --color-red-950: oklch(0.282 0.091 267.935);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -177,6 +178,43 @@
 
   .section-title {
     @apply text-3xl font-semibold text-zinc-900 sm:text-4xl dark:text-white;
+  }
+
+  /* Condensed all-caps headline (ADVENTURE, PLAN YOUR DREAM TRIP …) */
+  .display-title {
+    @apply font-display uppercase leading-[0.95] tracking-wide text-slate-950 dark:text-white;
+  }
+
+  /* Giant faded word that sits behind a section heading */
+  .watermark {
+    @apply pointer-events-none absolute left-1/2 top-1/2 -translate-1/2 select-none whitespace-nowrap text-center font-display text-[15vw] uppercase leading-none tracking-wider text-slate-100 sm:text-[9rem] lg:text-[11rem] dark:text-white/[0.04];
+  }
+
+  /* Blue pill button; pair with .btn-pill-icon for the round arrow on the right */
+  .btn-pill {
+    @apply inline-flex items-center gap-3 rounded-full bg-blue-500 py-1.5 pl-5 pr-1.5 text-sm font-medium text-white shadow-sm shadow-blue-500/20 transition-colors hover:bg-blue-600;
+  }
+
+  .btn-pill-icon {
+    @apply flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-950 transition-transform group-hover:rotate-45;
+  }
+
+  .btn-dark {
+    @apply inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200;
+  }
+
+  /* World map under the trip planner. On desktop it slides up behind the form card. */
+  .plan-map {
+    margin-top: 2.5rem;
+  }
+  @media (min-width: 1024px) {
+    .plan-map {
+      margin-top: -430px;
+    }
+  }
+
+  .field-soft {
+    @apply h-12 w-full rounded-xl bg-slate-100 px-4 text-sm text-slate-900 outline-none ring-blue-500/40 transition placeholder:text-slate-400 focus:ring-2 dark:bg-zinc-800/70 dark:text-white dark:placeholder:text-zinc-500;
   }
 }
 

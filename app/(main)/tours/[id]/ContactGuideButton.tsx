@@ -35,7 +35,7 @@ export default function ContactGuideButton({
     <>
       <button
         onClick={handleContact}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-slate-200 text-sm font-medium text-slate-900 transition-colors hover:bg-slate-50 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
       >
         <MessageCircle size={16} />
         Message the guide

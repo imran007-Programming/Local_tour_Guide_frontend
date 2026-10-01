@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Anton, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/provider/theme-provider";
 import { Toaster } from "sonner";
@@ -7,6 +7,14 @@ import LoadingBar from "@/components/LoadingBar";
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// Condensed headline font (closest free match to Gobold)
+const anton = Anton({
+  variable: "--font-anton",
+  weight: "400",
   subsets: ["latin"],
   display: "swap",
 });
@@ -68,7 +76,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} font-sans antialiased`}
+        className={`${inter.variable} ${anton.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <LoadingBar />

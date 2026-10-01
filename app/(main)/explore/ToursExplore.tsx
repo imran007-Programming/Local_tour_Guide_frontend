@@ -50,9 +50,13 @@ function ToursExploreContent() {
   const [category, setCategory] = useState(
     searchParams.get("category") || "all"
   );
-  const [city, setCity] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [debouncedPriceRange, setDebouncedPriceRange] = useState([0, 1000]);
+  const [city, setCity] = useState(searchParams.get("city") || "");
+  const [duration, setDuration] = useState(searchParams.get("duration") || "any");
+  // The home page search can pre-set a budget via ?minPrice=/?maxPrice=
+  const initialMinPrice = Math.min(Math.max(Number(searchParams.get("minPrice")) || 0, 0), 1000);
+  const initialMaxPrice = Math.min(Number(searchParams.get("maxPrice")) || 1000, 1000);
+  const [priceRange, setPriceRange] = useState([initialMinPrice, initialMaxPrice]);
+  const [debouncedPriceRange, setDebouncedPriceRange] = useState([initialMinPrice, initialMaxPrice]);
   const [guest, setGuest] = useState(searchParams.get("guests") || "");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
@@ -94,6 +98,7 @@ function ToursExploreContent() {
       if (debouncedPriceRange[1] < 1000)
         params.append("maxPrice", debouncedPriceRange[1].toString());
       if (guest) params.append("guest", guest);
+      if (duration && duration !== "any") params.append("duration", duration);
 
       const res = await fetch(`${BASE_URL}/tour?${params}`);
       if (res?.ok) {
@@ -108,7 +113,7 @@ function ToursExploreContent() {
 
     const debounce = setTimeout(fetchTours, 300);
     return () => clearTimeout(debounce);
-  }, [currentPage, searchTerm, category, city, debouncedPriceRange, guest, sortBy, sortOrder]);
+  }, [currentPage, searchTerm, category, city, debouncedPriceRange, guest, duration, sortBy, sortOrder]);
 
   const hasActiveFilters =
     searchTerm ||
@@ -116,7 +121,8 @@ function ToursExploreContent() {
     city ||
     debouncedPriceRange[0] > 0 ||
     debouncedPriceRange[1] < 1000 ||
-    guest;
+    guest ||
+    (duration && duration !== "any");
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -124,6 +130,7 @@ function ToursExploreContent() {
     setCity("");
     setPriceRange([0, 1000]);
     setGuest("");
+    setDuration("any");
     setSortBy("createdAt");
     setSortOrder("desc");
     setCurrentPage(1);
@@ -226,6 +233,25 @@ function ToursExploreContent() {
           onChange={(e) => { setGuest(e.target.value); setCurrentPage(1); }}
           className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100 transition"
         />
+      </div>
+
+      {/* Duration */}
+      <div>
+        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
+          Duration
+        </label>
+        <Select value={duration} onValueChange={(v) => { setDuration(v); setCurrentPage(1); }}>
+          <SelectTrigger className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 h-10">
+            <SelectValue placeholder="Any length" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="any">Any length</SelectItem>
+            <SelectItem value="2">Short trip (2+ hrs)</SelectItem>
+            <SelectItem value="4">Half day (4+ hrs)</SelectItem>
+            <SelectItem value="8">Full day (8+ hrs)</SelectItem>
+            <SelectItem value="24">Multi-day (24+ hrs)</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Sort */}

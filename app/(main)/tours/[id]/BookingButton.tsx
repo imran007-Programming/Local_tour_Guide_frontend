@@ -44,7 +44,7 @@ export default function BookingButton({
     <>
       <button
         onClick={handleBooking}
-        className={`h-11 shrink-0 rounded-lg bg-zinc-900 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 ${className}`}
+        className={`h-12 shrink-0 rounded-full bg-blue-500 text-sm font-medium text-white shadow-sm shadow-blue-500/25 transition-colors hover:bg-blue-600 ${className}`}
       >
         Book now
       </button>

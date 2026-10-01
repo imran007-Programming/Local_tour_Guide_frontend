@@ -17,7 +17,7 @@ const logos = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10];
 
 export default function ClientsMarquee() {
   return (
-    <section className="border-t border-zinc-200 bg-white py-10 dark:border-zinc-900 dark:bg-zinc-950">
+    <section className="bg-white py-10 dark:bg-zinc-950">
       <div className="container-page">
         <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">
           Trusted by 40+ travel partners worldwide

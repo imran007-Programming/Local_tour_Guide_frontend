@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
-import { MapPin, Menu, X } from "lucide-react";
+import { ArrowUpRight, MapPin, Menu, X } from "lucide-react";
 import SignInModal from "../Auth/Login";
 import RegisterModal from "../Auth/Register";
 import { logoutAction } from "@/app/actions/logoutAction";
@@ -95,49 +95,75 @@ export default function Navbar() {
     };
   }, []);
 
+  // On the home page the bar floats transparently over the hero image
+  const onHome = pathname === "/";
+  const overHero = onHome && !scrolled && !mobileOpen;
+
+  const iconBtn = overHero
+    ? "text-white hover:bg-white/15"
+    : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white";
+
   return (
     <header
-      className={`sticky top-0 z-50 w-full border-b bg-white/85 backdrop-blur-md transition-colors duration-200 dark:bg-zinc-950/85 ${
-        scrolled || mobileOpen
-          ? "border-zinc-200 dark:border-zinc-800"
-          : "border-transparent"
+      className={`${onHome ? "fixed" : "sticky"} top-0 z-50 w-full border-b transition-colors duration-300 ${
+        overHero
+          ? "border-transparent bg-transparent"
+          : "border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/85"
       }`}
     >
-      <div className="container-page flex h-16 items-center justify-between gap-6">
+      <div className="container-page flex h-16 items-center justify-between gap-6 md:h-20">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 dark:bg-white">
-            <MapPin className="h-4 w-4 text-white dark:text-zinc-900" />
-          </span>
-          <span className="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-white">
+        <Link href="/" className="flex shrink-0 items-center gap-1.5">
+          <MapPin
+            className={`h-6 w-6 ${overHero ? "fill-white text-blue-500" : "fill-blue-500 text-white dark:text-zinc-950"}`}
+            strokeWidth={2.25}
+          />
+          <span
+            className={`font-display text-xl uppercase tracking-wide ${
+              overHero ? "text-white" : "text-slate-950 dark:text-white"
+            }`}
+          >
             TourGuide
           </span>
         </Link>
 
         {/* Desktop links */}
-        <nav className="hidden md:flex items-center gap-1">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`rounded-md px-3 py-2 text-sm transition-colors ${
-                isActive(link.href)
-                  ? "font-medium text-zinc-900 dark:text-white"
-                  : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav className="hidden items-center gap-1.5 md:flex">
+          {links.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`rounded-full px-4 py-2 text-sm transition-colors ${
+                  overHero
+                    ? active
+                      ? "bg-white font-medium text-slate-950 shadow-sm"
+                      : "bg-white/15 text-white backdrop-blur-md hover:bg-white/25"
+                    : active
+                      ? "bg-blue-500 font-medium text-white"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right actions */}
         <div className="flex items-center gap-1 sm:gap-2">
-          {user?.data && <NotificationBell />}
+          {user?.data && (
+            <div className={overHero ? "[&_.lucide-bell]:text-white! [&>div>button]:hover:bg-white/15!" : ""}>
+              <NotificationBell />
+            </div>
+          )}
           <div className="hidden sm:block">
             <PwaInstall />
           </div>
-          <AnimatedThemeToggler className="flex h-9 w-9 items-center justify-center rounded-md text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white [&_svg]:size-4.5" />
+          <AnimatedThemeToggler
+            className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors [&_svg]:size-4.5 ${iconBtn}`}
+          />
 
           <div
             className={`hidden md:flex items-center gap-2 pl-2 transition-opacity ${
@@ -147,7 +173,7 @@ export default function Navbar() {
             {user?.data ? (
               <button
                 onClick={handleLogout}
-                className="rounded-md px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${iconBtn}`}
               >
                 Log out
               </button>
@@ -155,15 +181,22 @@ export default function Navbar() {
               <>
                 <button
                   onClick={() => setOpen(true)}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${iconBtn}`}
                 >
                   Sign in
                 </button>
                 <button
                   onClick={() => setGuideRegisterOpen(true)}
-                  className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+                  className={`group inline-flex items-center gap-3 rounded-full py-1.5 pl-4 pr-1.5 text-sm font-medium shadow-sm transition-colors ${
+                    overHero
+                      ? "bg-white text-slate-950 hover:bg-slate-100"
+                      : "bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950"
+                  }`}
                 >
                   Become a guide
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-white transition-transform group-hover:rotate-45">
+                    <ArrowUpRight size={15} />
+                  </span>
                 </button>
               </>
             )}
@@ -171,7 +204,7 @@ export default function Navbar() {
 
           {/* Mobile toggle */}
           <button
-            className="flex h-9 w-9 items-center justify-center rounded-md text-zinc-700 hover:bg-zinc-100 md:hidden dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className={`flex h-9 w-9 items-center justify-center rounded-full md:hidden ${iconBtn}`}
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
@@ -215,7 +248,7 @@ export default function Navbar() {
                     handleLogout();
                     setMobileOpen(false);
                   }}
-                  className="w-full rounded-md border border-zinc-200 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-800 dark:text-white"
+                  className="w-full rounded-full border border-zinc-200 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-800 dark:text-white"
                 >
                   Log out
                 </button>
@@ -226,7 +259,7 @@ export default function Navbar() {
                       setOpen(true);
                       setMobileOpen(false);
                     }}
-                    className="w-full rounded-md border border-zinc-200 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-800 dark:text-white"
+                    className="w-full rounded-full border border-zinc-200 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-800 dark:text-white"
                   >
                     Sign in
                   </button>
@@ -235,7 +268,7 @@ export default function Navbar() {
                       setRegisterOpen(true);
                       setMobileOpen(false);
                     }}
-                    className="w-full rounded-md border border-zinc-200 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-800 dark:text-white"
+                    className="w-full rounded-full border border-zinc-200 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-800 dark:text-white"
                   >
                     Create account
                   </button>
@@ -244,7 +277,7 @@ export default function Navbar() {
                       setGuideRegisterOpen(true);
                       setMobileOpen(false);
                     }}
-                    className="w-full rounded-md bg-zinc-900 py-3 text-sm font-medium text-white dark:bg-white dark:text-zinc-900"
+                    className="w-full rounded-full bg-blue-500 py-3 text-sm font-medium text-white"
                   >
                     Become a guide
                   </button>

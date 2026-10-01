@@ -127,7 +127,7 @@ export async function getLatestTours(limit = 6) {
 }
 
 export async function getGuides(): Promise<GuideSummary[]> {
-  return (await getPublic("/guides")).map(toGuide);
+  return (await getPublic("/guides?limit=100")).map(toGuide);
 }
 
 /** URL slug for a guide's profile page, e.g. "Imran Hasan" -> "imran-hasan". */

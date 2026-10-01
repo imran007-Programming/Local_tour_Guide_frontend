@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // A stray package-lock.json in the home folder made Next pick the wrong root,
+  // which left dev-mode styles stale. Pin it to this project.
+  turbopack: { root: __dirname },
   images: {
     // Only optimise images from hosts the app actually uses, so the image
     // endpoint can't be used to proxy/resize arbitrary third-party images.
