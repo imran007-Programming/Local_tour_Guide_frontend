@@ -2,7 +2,6 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import BreadcrumbBanner from "./components/BreadcrumbBanner";
 
 export default async function DashboardLayout({
   children,
@@ -28,12 +27,9 @@ export default async function DashboardLayout({
           {/* Header */}
           <Header user={user} />
 
-          {/* Breadcrumb */}
-          <BreadcrumbBanner />
-
           {/* Content */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8">
-            <div className="max-w-[1200px] mx-auto">{children}</div>
+          <main className="flex flex-1 flex-col p-4 sm:p-6 lg:p-8">
+            <div className="flex w-full flex-1 flex-col">{children}</div>
           </main>
         </div>
       </div>

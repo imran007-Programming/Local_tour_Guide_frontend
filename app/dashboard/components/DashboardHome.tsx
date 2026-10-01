@@ -69,6 +69,12 @@ export default function DashboardPage({ user }: { user: User }) {
             ? "/bookings/assigned/stats"
             : "/bookings/me/stats";
 
+      // Admins also need the user count; start it together with the stats instead of after them
+      const usersPromise =
+        role === "ADMIN"
+          ? authFetch(`${BASE_URL}/users?limit=1`).catch(() => null)
+          : null;
+
       const res = await authFetch(`${BASE_URL}${endpoint}`);
       if (res?.ok) {
         const data = await res.json();
@@ -90,9 +96,9 @@ export default function DashboardPage({ user }: { user: User }) {
       }
 
       // Fetch extra stats based on role
-      if (role === "ADMIN") {
+      if (usersPromise) {
         try {
-          const usersRes = await authFetch(`${BASE_URL}/users?limit=1`);
+          const usersRes = await usersPromise;
           if (usersRes?.ok) {
             const usersData = await usersRes.json();
             setExtraStats({ totalUsers: usersData.data?.meta?.total || 0 });

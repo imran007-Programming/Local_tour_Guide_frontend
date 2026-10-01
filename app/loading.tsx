@@ -5,54 +5,48 @@ import { MapPin } from "lucide-react";
 
 export default function Loading() {
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-[#070A13]">
+    <div
+      role="status"
+      aria-label="Loading"
+      className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-white dark:bg-zinc-950"
+    >
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="flex flex-col items-center gap-6"
+        className="flex flex-col items-center"
       >
-        {/* Logo with pulse */}
-        <motion.div
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="flex items-center gap-2"
-        >
-          <MapPin className="text-red-500 w-8 h-8" />
-          <span className="text-2xl font-bold text-zinc-900 dark:text-white">
-            TourGuide
-          </span>
-        </motion.div>
-
-        {/* Spinner */}
-        <div className="relative">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-            className="w-12 h-12 rounded-full border-4 border-red-200 dark:border-red-900 border-t-red-500 dark:border-t-red-400"
-          />
-          <motion.div
-            animate={{ rotate: -360 }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-1 w-8 h-8 rounded-full border-4 border-transparent border-b-red-400 dark:border-b-red-300"
-          />
-        </div>
-
-        {/* Pulsing dots */}
-        <div className="flex items-center gap-1.5">
-          {[0, 1, 2].map((i) => (
-            <motion.div
+        {/* Pin with expanding ripples */}
+        <div className="relative flex h-24 w-24 items-center justify-center">
+          {[0, 1].map((i) => (
+            <motion.span
               key={i}
-              animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
-              transition={{
-                duration: 1.2,
-                repeat: Infinity,
-                delay: i * 0.2,
-                ease: "easeInOut",
-              }}
-              className="w-2 h-2 rounded-full bg-red-500 dark:bg-red-400"
+              className="absolute h-full w-full rounded-full bg-blue-500/25"
+              initial={{ scale: 0.4, opacity: 0.7 }}
+              animate={{ scale: 1.4, opacity: 0 }}
+              transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.9, ease: "easeOut" }}
             />
           ))}
+          <motion.span
+            className="relative flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg shadow-blue-500/30"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <MapPin size={26} strokeWidth={2.25} />
+          </motion.span>
+        </div>
+
+        <p className="mt-6 font-display text-xl uppercase tracking-wide text-slate-950 dark:text-white">
+          TourGuide
+        </p>
+
+        {/* Sliding progress bar */}
+        <div className="mt-5 h-1 w-40 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-800">
+          <motion.div
+            className="h-full w-1/3 rounded-full bg-blue-500"
+            animate={{ x: ["-100%", "300%"] }}
+            transition={{ duration: 1.3, repeat: Infinity, ease: "easeInOut" }}
+          />
         </div>
       </motion.div>
     </div>

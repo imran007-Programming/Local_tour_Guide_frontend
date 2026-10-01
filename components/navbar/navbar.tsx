@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatedThemeToggler } from "../ui/animated-theme-toggler";
-import { ArrowUpRight, MapPin, Menu, X } from "lucide-react";
+import { ArrowUpRight, MapPin } from "lucide-react";
 import SignInModal from "../Auth/Login";
 import RegisterModal from "../Auth/Register";
 import { logoutAction } from "@/app/actions/logoutAction";
@@ -71,7 +71,18 @@ export default function Navbar() {
     await logoutAction();
   };
 
-  // Lock body scroll when mobile menu is open
+  // Close the menu on navigation and on Escape
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMobileOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Lock body scroll when the menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
@@ -127,30 +138,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop links */}
-        <nav className="hidden items-center gap-1.5 md:flex">
-          {links.map((link) => {
-            const active = isActive(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`rounded-full px-4 py-2 text-sm transition-colors ${
-                  overHero
-                    ? active
-                      ? "bg-white font-medium text-slate-950 shadow-sm"
-                      : "bg-white/15 text-white backdrop-blur-md hover:bg-white/25"
-                    : active
-                      ? "bg-blue-500 font-medium text-white"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white"
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
-
         {/* Right actions */}
         <div className="flex items-center gap-1 sm:gap-2">
           {user?.data && (
@@ -165,126 +152,148 @@ export default function Navbar() {
             className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors [&_svg]:size-4.5 ${iconBtn}`}
           />
 
-          <div
-            className={`hidden md:flex items-center gap-2 pl-2 transition-opacity ${
-              authLoaded ? "opacity-100" : "pointer-events-none opacity-0"
-            }`}
-          >
-            {user?.data ? (
-              <button
-                onClick={handleLogout}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${iconBtn}`}
-              >
-                Log out
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={() => setOpen(true)}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${iconBtn}`}
-                >
-                  Sign in
-                </button>
-                <button
-                  onClick={() => setGuideRegisterOpen(true)}
-                  className={`group inline-flex items-center gap-3 rounded-full py-1.5 pl-4 pr-1.5 text-sm font-medium shadow-sm transition-colors ${
-                    overHero
-                      ? "bg-white text-slate-950 hover:bg-slate-100"
-                      : "bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950"
-                  }`}
-                >
-                  Become a guide
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-white transition-transform group-hover:rotate-45">
-                    <ArrowUpRight size={15} />
-                  </span>
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Mobile toggle */}
+          {/* Menu toggle: the three bars morph into a cross */}
           <button
-            className={`flex h-9 w-9 items-center justify-center rounded-full md:hidden ${iconBtn}`}
+            className={`relative ml-1 flex h-10 w-10 items-center justify-center rounded-full transition-colors ${iconBtn}`}
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
           >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            <motion.span
+              className="absolute h-0.5 w-5 rounded-full bg-current"
+              animate={mobileOpen ? { y: 0, rotate: 45 } : { y: -6, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 26 }}
+            />
+            <motion.span
+              className="absolute h-0.5 w-5 rounded-full bg-current"
+              animate={mobileOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
+              transition={{ duration: 0.15 }}
+            />
+            <motion.span
+              className="absolute h-0.5 w-5 rounded-full bg-current"
+              animate={mobileOpen ? { y: 0, rotate: -45 } : { y: 6, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 26 }}
+            />
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Menu: slides down from the bar and shows everything */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            className="absolute inset-x-0 top-16 h-[calc(100dvh-4rem)] overflow-y-auto border-t border-zinc-200 bg-white md:hidden dark:border-zinc-800 dark:bg-zinc-950"
-          >
-            <nav className="container-page flex flex-col py-4">
-              {links.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`border-b border-zinc-100 py-3.5 text-base dark:border-zinc-900 ${
-                    isActive(link.href)
-                      ? "font-medium text-zinc-900 dark:text-white"
-                      : "text-zinc-600 dark:text-zinc-400"
+          <>
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 top-16 -z-10 bg-slate-950/40 backdrop-blur-sm md:top-20"
+            />
+            <motion.div
+              key="panel"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto rounded-b-3xl border-b border-slate-200/80 bg-white shadow-2xl shadow-slate-950/10 md:max-h-[calc(100dvh-5rem)] dark:border-zinc-800 dark:bg-zinc-950"
+            >
+              <div className="container-page grid gap-8 py-8 md:grid-cols-[1.4fr_1fr] md:gap-12 md:py-10">
+                <nav className="flex flex-col">
+                  {links.map((link, i) => {
+                    const active = isActive(link.href);
+                    return (
+                      <motion.div
+                        key={link.href}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.12 + i * 0.05, duration: 0.35, ease: "easeOut" }}
+                      >
+                        <Link
+                          href={link.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`group flex items-center justify-between border-b border-slate-100 py-4 text-2xl font-semibold tracking-tight transition-colors md:text-3xl dark:border-zinc-900 ${
+                            active
+                              ? "text-blue-500"
+                              : "text-slate-950 hover:text-blue-500 dark:text-white dark:hover:text-blue-400"
+                          }`}
+                        >
+                          {link.label}
+                          <ArrowUpRight
+                            size={22}
+                            className="opacity-0 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+                          />
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </nav>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + links.length * 0.05, duration: 0.35, ease: "easeOut" }}
+                  className={`flex flex-col justify-center gap-3 transition-opacity ${
+                    authLoaded ? "opacity-100" : "pointer-events-none opacity-0"
                   }`}
                 >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="container-page flex flex-col gap-2 pb-8 pt-2">
-              {user?.data ? (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setMobileOpen(false);
-                  }}
-                  className="w-full rounded-full border border-zinc-200 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-800 dark:text-white"
-                >
-                  Log out
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => {
-                      setOpen(true);
-                      setMobileOpen(false);
-                    }}
-                    className="w-full rounded-full border border-zinc-200 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-800 dark:text-white"
-                  >
-                    Sign in
-                  </button>
-                  <button
-                    onClick={() => {
-                      setRegisterOpen(true);
-                      setMobileOpen(false);
-                    }}
-                    className="w-full rounded-full border border-zinc-200 py-3 text-sm font-medium text-zinc-900 dark:border-zinc-800 dark:text-white"
-                  >
-                    Create account
-                  </button>
-                  <button
-                    onClick={() => {
-                      setGuideRegisterOpen(true);
-                      setMobileOpen(false);
-                    }}
-                    className="w-full rounded-full bg-blue-500 py-3 text-sm font-medium text-white"
-                  >
-                    Become a guide
-                  </button>
-                </>
-              )}
-            </div>
-          </motion.div>
+                  {user?.data ? (
+                    <>
+                      <p className="text-sm text-slate-500 dark:text-zinc-400">
+                        Signed in as{" "}
+                        <span className="font-medium text-slate-950 dark:text-white">
+                          {user.data.name ?? user.data.email}
+                        </span>
+                      </p>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setMobileOpen(false);
+                        }}
+                        className="w-full rounded-full border border-slate-200 py-3 text-sm font-medium text-slate-950 transition-colors hover:bg-slate-100 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
+                      >
+                        Log out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          setOpen(true);
+                          setMobileOpen(false);
+                        }}
+                        className="w-full rounded-full border border-slate-200 py-3 text-sm font-medium text-slate-950 transition-colors hover:bg-slate-100 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
+                      >
+                        Sign in
+                      </button>
+                      <button
+                        onClick={() => {
+                          setRegisterOpen(true);
+                          setMobileOpen(false);
+                        }}
+                        className="w-full rounded-full border border-slate-200 py-3 text-sm font-medium text-slate-950 transition-colors hover:bg-slate-100 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
+                      >
+                        Create account
+                      </button>
+                      <button
+                        onClick={() => {
+                          setGuideRegisterOpen(true);
+                          setMobileOpen(false);
+                        }}
+                        className="btn-pill group w-full justify-between"
+                      >
+                        Become a guide
+                        <span className="btn-pill-icon">
+                          <ArrowUpRight size={16} />
+                        </span>
+                      </button>
+                    </>
+                  )}
+                </motion.div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
