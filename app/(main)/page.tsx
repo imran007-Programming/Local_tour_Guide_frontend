@@ -8,14 +8,21 @@ import TopGuides from "@/components/home/TopGuides";
 import Reviews from "@/components/home/Review";
 import Faq from "@/components/home/Faq";
 import CtaSection from "@/components/home/CtaSection";
-import { getGuides, getLatestTours, getReviews, getTourCategories } from "@/lib/publicApi";
+import {
+  getDestinations,
+  getGuides,
+  getLatestTours,
+  getReviews,
+  getTourCategories,
+} from "@/lib/publicApi";
 
 // Rebuild the cached page in the background at most every 5 minutes
 export const revalidate = 300;
 
 export default async function Homepage() {
-  const [tours, guides, reviews, categories] = await Promise.all([
+  const [tours, destinations, guides, reviews, categories] = await Promise.all([
     getLatestTours(6),
+    getDestinations(),
     getGuides(),
     getReviews(),
     getTourCategories(),
@@ -28,7 +35,7 @@ export default async function Homepage() {
     <div className="overflow-x-clip">
       <HeroSection categories={categories} />
       <ClientsMarquee />
-      <FeaturedDestinations tours={tours} />
+      <FeaturedDestinations destinations={destinations} />
       <FeaturedTours tours={tours} />
       <PlanTrip categories={categories} cities={cities} />
       <AboutSection />

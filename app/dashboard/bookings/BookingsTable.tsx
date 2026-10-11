@@ -1,10 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-
-const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
-
 import { format } from "date-fns";
 import Image from "next/image";
 import { Booking } from "@/types/bookings";
@@ -18,6 +14,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -28,19 +26,60 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  XCircle,
+  ArrowDownWideNarrow,
+  ArrowUpNarrowWide,
+  CalendarDays,
   CheckCheck,
-  Search,
-  Filter,
-  ArrowUpDown,
-  MapPin,
-  Clock,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  CircleDot,
   CreditCard,
-  AlertCircle,
+  DollarSign,
   Loader2,
+  MapPin,
+  MousePointerClick,
+  Search,
+  User as UserIcon,
+  X,
+  XCircle,
 } from "lucide-react";
-import BookingsPagination from "./BookingsPagination";
-import { motion } from "framer-motion";
+
+const PAGE_SIZE = 10;
+
+const STATUSES = [
+  { value: "all", label: "All statuses" },
+  { value: "PENDING", label: "Pending" },
+  { value: "CONFIRMED", label: "Confirmed" },
+  { value: "COMPLETED", label: "Completed" },
+  { value: "CANCELLED", label: "Cancelled" },
+];
+
+const STATUS_BADGE: Record<string, string> = {
+  CONFIRMED: "border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-400",
+  PENDING: "border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400",
+  COMPLETED: "border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400",
+  CANCELLED: "border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400",
+};
+
+const PAYMENT_TEXT: Record<string, string> = {
+  PAID: "text-emerald-600 dark:text-emerald-400",
+  PENDING: "text-amber-600 dark:text-amber-400",
+  FAILED: "text-red-600 dark:text-red-400",
+};
+
+const titleCase = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
+
+// Same look as the users table
+const chip =
+  "inline-flex h-9 items-center gap-1.5 rounded-full border border-dashed border-slate-300 bg-white px-3.5 text-[13px] font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800";
+const pageBtn =
+  "flex h-8 min-w-8 items-center justify-center rounded-md border border-slate-200 bg-white px-1.5 text-xs text-slate-600 transition-colors hover:bg-slate-50 disabled:pointer-events-none disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800";
+const th =
+  "h-12 whitespace-nowrap border-r border-slate-200 px-4 text-left align-middle text-[13px] font-medium text-slate-500 last:border-r-0 dark:border-zinc-800 dark:text-zinc-400";
+const td =
+  "border-r border-slate-200 px-4 py-3 align-middle last:border-r-0 dark:border-zinc-800";
+const person = "whitespace-nowrap text-slate-600 dark:text-zinc-300";
 
 export default function BookingsTable({
   user,
@@ -51,23 +90,26 @@ export default function BookingsTable({
 }) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [paginationLoading, setPaginationLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string>("");
   const [cancelReason, setCancelReason] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(initialStatus || "");
-  const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
   const [paymentLoading, setPaymentLoading] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [successAnimation, setSuccessAnimation] = useState(null);
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
   const isGuide = user.data.role === "GUIDE";
   const isTourist = user.data.role === "TOURIST";
   const isAdmin = user.data.role === "ADMIN";
+
+  // Any filter change goes back to page 1, otherwise page 3 of a 1-page result is empty
+  const updateFilter = (apply: () => void) => {
+    apply();
+    setCurrentPage(1);
+  };
 
   const cancelBooking = async () => {
     const res = await authFetch(
@@ -110,12 +152,10 @@ export default function BookingsTable({
   };
 
   useEffect(() => {
-    // payment success is handled by /dashboard/bookings/[bookingId] page
-  }, []);
+    let cancelled = false;
 
-  useEffect(() => {
     const fetchBookings = async () => {
-      setPaginationLoading(true);
+      setFetching(true);
       let endpoint = "";
       if (isGuide) endpoint = "/bookings/assigned";
       else if (isTourist) endpoint = "/bookings/me";
@@ -123,8 +163,8 @@ export default function BookingsTable({
 
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: "5",
-        sortBy,
+        limit: String(PAGE_SIZE),
+        sortBy: "createdAt",
         sortOrder,
       });
       if (searchTerm) params.append("searchTerm", searchTerm);
@@ -133,19 +173,28 @@ export default function BookingsTable({
       const res = await authFetch(`${BASE_URL}${endpoint}?${params}`, {
         cache: "no-store",
       });
+
+      // A newer request already replaced this one, so drop its answer
+      if (cancelled) return;
+
       if (res?.ok) {
         const result = await res.json();
+        if (cancelled) return;
         setBookings(result.data.data || []);
         const meta = result.data.meta;
-        setTotalPages(Math.ceil(meta.total / meta.limit));
+        setTotalCount(meta.total);
+        setTotalPages(Math.max(1, Math.ceil(meta.total / meta.limit)));
       }
       setLoading(false);
-      setPaginationLoading(false);
+      setFetching(false);
     };
 
     const debounce = setTimeout(fetchBookings, 300);
-    return () => clearTimeout(debounce);
-  }, [isGuide, isTourist, isAdmin, currentPage, searchTerm, statusFilter, sortBy, sortOrder, refetchTrigger]);
+    return () => {
+      cancelled = true;
+      clearTimeout(debounce);
+    };
+  }, [isGuide, isTourist, isAdmin, currentPage, searchTerm, statusFilter, sortOrder]);
 
   const handlePayment = async (bookingId: string) => {
     setPaymentLoading(bookingId);
@@ -178,325 +227,329 @@ export default function BookingsTable({
     }
   };
 
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case "CONFIRMED":
-        return "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400";
-      case "PENDING":
-        return "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400";
-      case "COMPLETED":
-        return "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400";
-      case "CANCELLED":
-        return "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400";
-      default:
-        return "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400";
-    }
-  };
-
-  const getPaymentStyle = (status?: string) => {
-    switch (status) {
-      case "PAID":
-        return "text-emerald-600 dark:text-emerald-400";
-      case "PENDING":
-        return "text-amber-600 dark:text-amber-400";
-      case "FAILED":
-        return "text-red-600 dark:text-red-400";
-      default:
-        return "text-zinc-500 dark:text-zinc-400";
-    }
-  };
-
   if (loading) {
     return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <div
-            key={i}
-            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5"
-          >
-            <div className="flex gap-4">
-              <div className="w-24 h-20 bg-zinc-200 dark:bg-zinc-700 rounded-xl animate-pulse shrink-0" />
-              <div className="flex-1 space-y-3">
-                <div className="h-5 bg-zinc-200 dark:bg-zinc-700 rounded w-1/3 animate-pulse" />
-                <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-2/3 animate-pulse" />
-                <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-1/2 animate-pulse" />
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="flex items-center justify-center py-20">
+        <Spinner size="lg" className="text-blue-500" />
       </div>
     );
   }
 
+  const hasFilters = searchTerm || statusFilter;
+  const from = totalCount === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const to = Math.min(currentPage * PAGE_SIZE, totalCount);
+  const statusLabel = STATUSES.find((s) => s.value === statusFilter)?.label;
+  // Admins only look; tourists and guides get row actions
+  const showActions = !isAdmin;
+  const columnCount = (isAdmin ? 6 : 5) + (showActions ? 1 : 0);
+
   return (
     <>
-      {showSuccess && successAnimation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <Lottie animationData={successAnimation} loop={false} style={{ width: "100vw", height: "100vh" }} />
-        </div>
-      )}
+      <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+        {/* Toolbar */}
+        <div className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
+          <div className="flex flex-wrap items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className={chip}>
+                  <CircleDot size={13} />
+                  Status{statusFilter ? `: ${statusLabel}` : ""}
+                  <ChevronDown size={12} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuRadioGroup
+                  value={statusFilter || "all"}
+                  onValueChange={(v) => updateFilter(() => setStatusFilter(v === "all" ? "" : v))}
+                >
+                  {STATUSES.map((s) => (
+                    <DropdownMenuRadioItem key={s.value} value={s.value}>
+                      {s.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-      <div className="space-y-4">
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
-            <input
-              placeholder="Search tours, names, or emails..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 placeholder:text-zinc-400 text-zinc-900 dark:text-zinc-100 transition"
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="rounded-xl h-10 gap-2 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300">
-                <Filter size={14} />
-                {statusFilter || "All Status"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setStatusFilter("")}>All</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("PENDING")}>Pending</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("CONFIRMED")}>Confirmed</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("COMPLETED")}>Completed</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setStatusFilter("CANCELLED")}>Cancelled</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button
-            variant="outline"
-            className="rounded-xl h-10 w-10 p-0 border-zinc-200 dark:border-zinc-800"
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          >
-            {sortOrder === "asc" ? "↑" : "↓"}
-          </Button>
-        </div>
+            <button
+              onClick={() => updateFilter(() => setSortOrder(sortOrder === "asc" ? "desc" : "asc"))}
+              className={chip}
+              aria-label="Toggle sort direction"
+            >
+              {sortOrder === "asc" ? <ArrowUpNarrowWide size={13} /> : <ArrowDownWideNarrow size={13} />}
+              {sortOrder === "asc" ? "Oldest first" : "Newest first"}
+            </button>
 
-        {/* Bookings */}
-        {bookings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
-              <MapPin size={28} className="text-zinc-400" />
-            </div>
-            <h3 className="text-base font-medium text-zinc-900 dark:text-white">No bookings found</h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-              {statusFilter ? `No ${statusFilter.toLowerCase()} bookings` : "Your bookings will appear here"}
-            </p>
-          </div>
-        ) : paginationLoading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5">
-                <div className="flex gap-4">
-                  <div className="w-24 h-20 bg-zinc-200 dark:bg-zinc-700 rounded-xl animate-pulse shrink-0" />
-                  <div className="flex-1 space-y-3">
-                    <div className="h-5 bg-zinc-200 dark:bg-zinc-700 rounded w-1/3 animate-pulse" />
-                    <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-2/3 animate-pulse" />
-                    <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-1/2 animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {bookings.map((booking, index) => (
-              <motion.div
-                key={booking.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden hover:shadow-md transition-shadow"
+            {hasFilters && (
+              <button
+                onClick={() =>
+                  updateFilter(() => {
+                    setSearchTerm("");
+                    setStatusFilter("");
+                  })
+                }
+                className="inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-medium text-slate-500 transition-colors hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white"
               >
-                <div className="p-4 sm:p-5">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    {/* Tour Image */}
-                    <div className="relative w-full sm:w-28 h-40 sm:h-24 rounded-xl overflow-hidden shrink-0">
-                      <Image
-                        src={booking.tour.images[0] || "/placeholder.jpg"}
-                        alt={booking.tour.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                        <div>
-                          <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                            {booking.tour.title}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-                            <span className="flex items-center gap-1">
-                              <Clock size={12} />
-                              {format(new Date(booking.bookingDateTime), "MMM dd, yyyy · h:mm a")}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              {isGuide ? `Tourist: ${booking.tourist.user.name}` : `Guide: ${booking.guide.user.name}`}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Price + Status */}
-                        <div className="flex items-center gap-2 sm:flex-col sm:items-end sm:gap-1.5">
-                          <span className="text-lg font-bold text-zinc-900 dark:text-white">
-                            ${booking.tour.price}
-                          </span>
-                          <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${getStatusStyle(booking.status)}`}>
-                            {booking.status}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Message */}
-                      {booking.message && (
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-1 italic">
-                          "{booking.message}"
-                        </p>
-                      )}
-
-                      {/* Cancel reason */}
-                      {booking.status === "CANCELLED" && booking.cancelReason && (
-                        <p className="text-xs text-red-500 dark:text-red-400 mt-1.5 flex items-center gap-1">
-                          <AlertCircle size={12} />
-                          {booking.cancelReason}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="px-4 sm:px-5 py-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/50 flex flex-wrap items-center justify-between gap-3">
-                  {/* Payment info */}
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-                    <span className="flex items-center gap-1.5">
-                      <CreditCard size={12} className="text-zinc-400" />
-                      <span className="text-zinc-500 dark:text-zinc-400">Payment:</span>
-                      <span className={`font-medium ${getPaymentStyle(booking?.payment?.status)}`}>
-                        {booking?.payment?.status || "NOT PAID"}
-                      </span>
-                    </span>
-                    {booking?.payment?.paidAt && (
-                      <span className="text-zinc-400">
-                        {format(new Date(booking.payment.paidAt), "MMM dd, yyyy")}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    {/* Tourist: Pay button */}
-                    {isTourist && booking?.payment?.status !== "PAID" && booking.status !== "CANCELLED" && (
-                      <button
-                        onClick={() => handlePayment(booking.id)}
-                        disabled={paymentLoading === booking.id}
-                        className="px-4 py-1.5 text-xs font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition disabled:opacity-50 flex items-center gap-1.5"
-                      >
-                        {paymentLoading === booking.id ? (
-                          <Loader2 size={12} className="animate-spin" />
-                        ) : (
-                          <CreditCard size={12} />
-                        )}
-                        Pay Now
-                      </button>
-                    )}
-
-                    {/* Tourist: Cancel button */}
-                    {isTourist && booking.status !== "CANCELLED" && booking?.payment?.status !== "PAID" && (
-                      <button
-                        onClick={() => {
-                          setSelectedBookingId(booking.id);
-                          setCancelModalOpen(true);
-                        }}
-                        className="px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400 rounded-lg transition"
-                      >
-                        Cancel
-                      </button>
-                    )}
-
-                    {/* Guide: Status update */}
-                    {isGuide && booking.status !== "CANCELLED" && booking.status !== "COMPLETED" && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button className="px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition">
-                            Update Status
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem onClick={() => updateStatus(booking.id, "COMPLETED")}>
-                            <CheckCheck className="mr-2 h-4 w-4 text-emerald-500" />
-                            Mark Completed
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => updateStatus(booking.id, "CANCELLED")}>
-                            <XCircle className="mr-2 h-4 w-4 text-red-500" />
-                            Cancel
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-
-                    {/* Paid badge */}
-                    {booking?.payment?.status === "PAID" && (
-                      <span className="px-3 py-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center gap-1">
-                        <CheckCheck size={12} />
-                        Paid
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-
-            {totalPages > 1 && (
-              <BookingsPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+                <X size={13} />
+                Reset
+              </button>
             )}
           </div>
-        )}
 
-        {/* Cancel Modal */}
-        <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Cancel Booking</DialogTitle>
-            </DialogHeader>
-            <div className="py-4">
-              <label className="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Reason for cancellation
-              </label>
-              <textarea
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 resize-none placeholder:text-zinc-400"
-                rows={4}
-                placeholder="Please provide a reason..."
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                className="rounded-xl"
-                onClick={() => { setCancelModalOpen(false); setCancelReason(""); }}
-              >
-                Close
-              </Button>
-              <Button
-                variant="destructive"
-                className="rounded-xl"
-                onClick={cancelBooking}
-                disabled={!cancelReason.trim()}
-              >
-                Cancel Booking
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          <div className="relative w-full sm:w-56 sm:shrink-0">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <input
+              placeholder="Search bookings"
+              value={searchTerm}
+              onChange={(e) => updateFilter(() => setSearchTerm(e.target.value))}
+              className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs text-slate-900 outline-none ring-blue-500/30 transition placeholder:text-slate-400 focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+            />
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className={`flex-1 overflow-x-auto transition-opacity ${fetching ? "opacity-50" : "opacity-100"}`}>
+          <table className="w-full min-w-230 border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50/60 dark:border-zinc-800 dark:bg-zinc-900/60">
+                <th className={th}>
+                  <span className="inline-flex items-center gap-1.5"><MapPin size={13} />Tour</span>
+                </th>
+                <th className={th}>
+                  <span className="inline-flex items-center gap-1.5"><CalendarDays size={13} />Date</span>
+                </th>
+                {(isGuide || isAdmin) && (
+                  <th className={th}>
+                    <span className="inline-flex items-center gap-1.5"><UserIcon size={13} />Tourist</span>
+                  </th>
+                )}
+                {(isTourist || isAdmin) && (
+                  <th className={th}>
+                    <span className="inline-flex items-center gap-1.5"><UserIcon size={13} />Guide</span>
+                  </th>
+                )}
+                <th className={th}>
+                  <span className="inline-flex items-center gap-1.5"><DollarSign size={13} />Price</span>
+                </th>
+                <th className={th}>
+                  <span className="inline-flex items-center gap-1.5"><CircleDot size={13} />Status</span>
+                </th>
+                <th className={th}>
+                  <span className="inline-flex items-center gap-1.5"><CreditCard size={13} />Payment</span>
+                </th>
+                {showActions && (
+                  <th className={th}>
+                    <span className="inline-flex items-center gap-1.5"><MousePointerClick size={13} />Actions</span>
+                  </th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.length === 0 ? (
+                <tr>
+                  <td colSpan={columnCount} className="py-16 text-center text-sm text-slate-500 dark:text-zinc-400">
+                    {statusFilter ? `No ${statusFilter.toLowerCase()} bookings` : "No bookings found"}
+                  </td>
+                </tr>
+              ) : (
+                bookings.map((booking) => {
+                  const paid = booking.payment?.status === "PAID";
+                  const isCancelled = booking.status === "CANCELLED";
+                  const canPay = isTourist && !paid && !isCancelled;
+                  const canUpdate = isGuide && !isCancelled && booking.status !== "COMPLETED";
+
+                  return (
+                    <tr
+                      key={booking.id}
+                      className="border-b border-slate-200 transition-colors last:border-b-0 hover:bg-slate-50/70 dark:border-zinc-800 dark:hover:bg-zinc-900/60"
+                    >
+                      <td className={td}>
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-11 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-zinc-800">
+                            <Image
+                              src={booking.tour.images[0] || "/hero/Hero1.jpg"}
+                              alt={booking.tour.title}
+                              fill
+                              sizes="56px"
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0 max-w-56">
+                            <p className="truncate font-medium text-slate-900 dark:text-white">
+                              {booking.tour.title}
+                            </p>
+                            {booking.message && (
+                              <p className="truncate text-xs italic text-slate-500 dark:text-zinc-400">
+                                “{booking.message}”
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className={`${td} whitespace-nowrap text-slate-600 dark:text-zinc-300`}>
+                        {format(new Date(booking.bookingDateTime), "dd MMM yyyy, h:mm a")}
+                      </td>
+                      {(isGuide || isAdmin) && (
+                        <td className={`${td} ${person}`}>{booking.tourist?.user?.name ?? "—"}</td>
+                      )}
+                      {(isTourist || isAdmin) && (
+                        <td className={`${td} ${person}`}>{booking.guide?.user?.name ?? "—"}</td>
+                      )}
+                      <td className={`${td} whitespace-nowrap font-semibold text-slate-900 dark:text-white`}>
+                        ${booking.tour.price}
+                      </td>
+                      <td className={td}>
+                        <span
+                          className={`inline-block rounded-md border px-2.5 py-1 text-[13px] font-medium ${
+                            STATUS_BADGE[booking.status] || "border-slate-200 bg-slate-50 text-slate-600"
+                          }`}
+                        >
+                          {titleCase(booking.status)}
+                        </span>
+                        {isCancelled && booking.cancelReason && (
+                          <p className="mt-1 max-w-44 truncate text-xs text-rose-500 dark:text-rose-400" title={booking.cancelReason}>
+                            {booking.cancelReason}
+                          </p>
+                        )}
+                      </td>
+                      <td className={`${td} whitespace-nowrap`}>
+                        <p className={`font-medium ${PAYMENT_TEXT[booking.payment?.status ?? ""] || "text-slate-500 dark:text-zinc-400"}`}>
+                          {booking.payment?.status ? titleCase(booking.payment.status) : "Not paid"}
+                        </p>
+                        {booking.payment?.paidAt && (
+                          <p className="text-xs text-slate-400">
+                            {format(new Date(booking.payment.paidAt), "dd MMM yyyy")}
+                          </p>
+                        )}
+                      </td>
+                      {showActions && (
+                        <td className={td}>
+                          <div className="flex items-center gap-2">
+                            {canPay && (
+                              <>
+                                <button
+                                  onClick={() => handlePayment(booking.id)}
+                                  disabled={paymentLoading === booking.id}
+                                  className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-md bg-blue-500 px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
+                                >
+                                  {paymentLoading === booking.id ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <CreditCard size={14} />
+                                  )}
+                                  Pay now
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setSelectedBookingId(booking.id);
+                                    setCancelModalOpen(true);
+                                  }}
+                                  className="inline-flex h-9 items-center rounded-md border border-slate-200 bg-white px-3.5 text-[13px] font-medium text-slate-700 transition-colors hover:border-rose-500 hover:bg-rose-500 hover:text-white dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-rose-500 dark:hover:bg-rose-500 dark:hover:text-white"
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            )}
+
+                            {canUpdate && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-md border border-slate-200 bg-white px-3.5 text-[13px] font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800">
+                                    Update status
+                                    <ChevronDown size={13} />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                  <DropdownMenuItem onClick={() => updateStatus(booking.id, "COMPLETED")}>
+                                    <CheckCheck className="mr-2 h-4 w-4 text-emerald-500" />
+                                    Mark Completed
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => updateStatus(booking.id, "CANCELLED")}>
+                                    <XCircle className="mr-2 h-4 w-4 text-red-500" />
+                                    Cancel
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+
+                            {!canPay && !canUpdate && <span className="text-slate-400">—</span>}
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer */}
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-200 px-5 py-4 text-[13px] text-slate-500 sm:flex-row dark:border-zinc-800 dark:text-zinc-400">
+          <span>
+            {from}-{to} of {totalCount} bookings
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              className={pageBtn}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              aria-label="Previous page"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              className={pageBtn}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="Next page"
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Cancel Modal */}
+      <Dialog open={cancelModalOpen} onOpenChange={setCancelModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancel Booking</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="block mb-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Reason for cancellation
+            </label>
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500 resize-none placeholder:text-zinc-400"
+              rows={4}
+              placeholder="Please provide a reason..."
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => { setCancelModalOpen(false); setCancelReason(""); }}
+            >
+              Close
+            </Button>
+            <Button
+              variant="destructive"
+              className="rounded-xl"
+              onClick={cancelBooking}
+              disabled={!cancelReason.trim()}
+            >
+              Cancel Booking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

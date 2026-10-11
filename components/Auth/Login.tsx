@@ -3,7 +3,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { X, Eye, EyeOff, MapPin, ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import { toast } from "sonner";
 
 import { useForm } from "react-hook-form";
@@ -14,7 +13,6 @@ import { BASE_URL } from "@/lib/config";
 import { useRouter } from "next/navigation";
 import { loginAction } from "@/app/actions/loginAction";
 import { notifyAuthChanged } from "@/hooks/useCurrentUser";
-import { motion } from "framer-motion";
 import {
   dialogClass,
   errorClass,
@@ -53,7 +51,6 @@ export default function SignInModal({
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -90,16 +87,12 @@ export default function SignInModal({
       if (onSuccess) {
         onSuccess();
       } else {
-        setIsRedirecting(true);
-        setTimeout(() => {
-          router.push("/dashboard");
-          router.refresh();
-        }, 1000);
+        router.push("/dashboard");
+        router.refresh();
       }
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Login failed");
-      setIsRedirecting(false);
     } finally {
       setIsLoading(false);
     }
@@ -109,22 +102,6 @@ export default function SignInModal({
 
   return (
     <>
-      {/* Full-screen redirect overlay. Portalled to <body> because an ancestor
-          with backdrop-filter (the navbar) would otherwise trap `position: fixed`. */}
-      {isRedirecting &&
-        createPortal(
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-3 bg-white dark:bg-zinc-950"
-          >
-            <Spinner size="md" className="text-zinc-900 dark:text-white" />
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">Taking you to your dashboard…</p>
-          </motion.div>,
-          document.body,
-        )}
-
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent showCloseButton={false} className={`${dialogClass} sm:max-w-100`}>
           <div className="p-6 sm:p-8">

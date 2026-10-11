@@ -8,6 +8,7 @@ const columns: { title: string; items: FooterItem[] }[] = [
     title: "Explore",
     items: [
       { label: "All tours", href: "/explore" },
+      { label: "Destinations", href: "/destinations" },
       { label: "Local guides", href: "/guides" },
       { label: "Dashboard", href: "/dashboard" },
     ],

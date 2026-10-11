@@ -43,6 +43,14 @@ export interface TourSummary {
   guide?: { user?: { name?: string } };
 }
 
+export interface DestinationSummary {
+  slug: string;
+  city: string;
+  image?: string;
+  tours: number;
+  from: number;
+}
+
 export interface GuideSummary {
   id: string;
   name: string;
@@ -148,10 +156,50 @@ export async function getGuideBySlug(slug: string) {
   );
 }
 
-// The tour API has no guide filter, so filter the cached full list
+// The tour API has no guide or exact-city filter, so pages filter this cached full list
+async function getAllTours() {
+  return (await getPublic("/tour?limit=100")).map(toTour);
+}
+
 export async function getToursByGuide(guideId: string) {
-  const tours = await getPublic("/tour?limit=100");
-  return tours.filter((t) => t.guideId === guideId).map(toTour);
+  return (await getAllTours()).filter((t) => t.guideId === guideId);
+}
+
+/** URL slug for a destination page, e.g. "Cox's Bazar" -> "coxs-bazar", "Göreme" -> "goreme". */
+export const destinationSlug = (city: string) => {
+  const name = city.trim().toLowerCase();
+  const slug = name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  // Names with no Latin letters would otherwise all collapse to ""
+  return slug || name;
+};
+
+/** One entry per city that has at least one tour, busiest first. */
+export async function getDestinations(): Promise<DestinationSummary[]> {
+  const bySlug = new Map<string, DestinationSummary>();
+  for (const t of await getAllTours()) {
+    const city = t.city?.trim();
+    if (!city) continue;
+    const slug = destinationSlug(city);
+    const d = bySlug.get(slug);
+    if (d) {
+      d.tours += 1;
+      d.from = Math.min(d.from, t.price);
+      d.image ??= t.images[0];
+    } else {
+      bySlug.set(slug, { slug, city, image: t.images[0], tours: 1, from: t.price });
+    }
+  }
+  return [...bySlug.values()].sort((a, b) => b.tours - a.tours || a.city.localeCompare(b.city));
+}
+
+export async function getToursByDestination(slug: string) {
+  const decoded = decodeURIComponent(slug);
+  return (await getAllTours()).filter((t) => t.city && destinationSlug(t.city) === decoded);
 }
 
 export async function getReviews(): Promise<ReviewSummary[]> {

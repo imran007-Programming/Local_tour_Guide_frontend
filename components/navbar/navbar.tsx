@@ -20,6 +20,7 @@ function getLinks(role?: string): NavLink[] {
   const base = [
     { href: "/", label: "Home" },
     { href: "/explore", label: "Explore" },
+    { href: "/destinations", label: "Destinations" },
     { href: "/guides", label: "Guides" },
   ];
 

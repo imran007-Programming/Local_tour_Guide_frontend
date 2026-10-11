@@ -1,6 +1,7 @@
-// Intentionally empty: no full-screen loader inside the dashboard. Without this
-// file Next.js would fall back to app/loading.tsx and cover the whole screen
-// (sidebar included) on every dashboard navigation.
+// Intentionally empty: no loader inside the dashboard, so the sidebar and
+// header stay put while a page loads. The full-screen loader lives in
+// app/(main)/loading.tsx (not app/loading.tsx) so it never covers the screen
+// on the way into the dashboard either.
 export default function DashboardLoading() {
   return null;
 }
