@@ -14,9 +14,24 @@ export const PUBLIC_REVALIDATE_SECONDS = 300;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Raw = any;
 
+// A build prerenders dozens of pages at once, and a single DNS hiccup
+// (EAI_AGAIN) or dropped connection used to fail the whole build. Network
+// errors are retried with a short backoff; HTTP error responses are returned
+// as they are, and the last network error is rethrown.
+export async function fetchWithRetry(url: string, init?: RequestInit, attempts = 4): Promise<Response> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetch(url, init);
+    } catch (err) {
+      if (attempt >= attempts) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 500 * 2 ** (attempt - 1)));
+    }
+  }
+}
+
 async function getPublic(path: string): Promise<Raw[]> {
   try {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const res = await fetchWithRetry(`${BASE_URL}${path}`, {
       next: { revalidate: PUBLIC_REVALIDATE_SECONDS },
     });
     if (!res.ok) return [];

@@ -7,6 +7,7 @@ import Image from "next/image";
 import { getSectionsByRole } from "./sidebarLinks";
 import { LogOut, MapPin, X } from "lucide-react";
 import { logoutAction } from "@/app/actions/logoutAction";
+import { clearCurrentUser } from "@/hooks/useCurrentUser";
 import { BASE_URL } from "@/lib/config";
 
 export default function Sidebar({
@@ -20,11 +21,18 @@ export default function Sidebar({
   const sections = getSectionsByRole(user?.data?.role || "");
 
   const handleLogout = async () => {
-    await fetch(`${BASE_URL}/auth/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
+    try {
+      await fetch(`${BASE_URL}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // Best effort: deleting the cookies below is what signs the browser out
+    }
     window.history.replaceState(null, "", "/");
+    // The public navbar caches the signed-in user for the whole session; without
+    // this it still shows "Log out" after the redirect to the home page.
+    clearCurrentUser();
     await logoutAction();
   };
 

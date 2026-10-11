@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { authFetch } from "@/lib/authFetch";
 import { BASE_URL } from "@/lib/config";
 import { logoutAction } from "@/app/actions/logoutAction";
+import { clearCurrentUser } from "@/hooks/useCurrentUser";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -100,6 +101,7 @@ export default function SettingsContent({ user }: { user: User }) {
 
       if (res?.ok) {
         toast.success("Account deleted successfully");
+        clearCurrentUser();
         await logoutAction();
       } else {
         toast.error("Failed to delete account");

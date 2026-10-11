@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BASE_URL } from "@/lib/config";
-import { getGuides } from "@/lib/publicApi";
+import { fetchWithRetry, getGuides } from "@/lib/publicApi";
 import TourPageContent, { type TourDetails } from "./TourPageContent";
 
 export const revalidate = 3600;
@@ -38,8 +38,10 @@ function toTourDetails(t: any): TourDetails {
   };
 }
 
+// A network failure is retried and then thrown on purpose: returning null would
+// cache a "Tour not found" page for an hour in place of a real tour.
 async function getTour(slug: string) {
-  const res = await fetch(`${BASE_URL}/tour/${slug}`, {
+  const res = await fetchWithRetry(`${BASE_URL}/tour/${slug}`, {
     next: { revalidate: 3600 },
   });
   if (!res?.ok) return null;
